@@ -23,7 +23,7 @@ class QPushButton;
 class QLineEdit;
 class QStringList;
 class QFileDialog;
-
+class QRadioButton;
 
 class KUI_project : public QWidget
 {
@@ -31,6 +31,7 @@ class KUI_project : public QWidget
   
   public:
     KUI_project(QWidget *parent=0);
+    virtual ~KUI_project();
     
   private:
     QPushButton *recordButton;
@@ -38,18 +39,24 @@ class KUI_project : public QWidget
     QPushButton *locationButton;
     QPushButton *stopButton;
     
+    QRadioButton *aviButton;
+    QRadioButton *oggButton;
+    
     QLineEdit *address;
     QStringList path;
     
     QFileDialog *fileDiag;
     
     QWidget *screenShotLabel;
-     
+    
+    bool avi;
   public slots:
     void location();
     void pathChenged();
     void startRecording();
     void stopRecording();
+    void aviChecked();
+    void oggChecked();
 };
 
 

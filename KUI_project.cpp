@@ -28,7 +28,7 @@
 KUI_project::KUI_project(QWidget* parent): QWidget(parent)
 {
    
-
+  avi=true;
   setWindowTitle(tr("KDE Usability Inspector"));
   resize(320,240);
   path.push_back("/home/");
@@ -38,14 +38,31 @@ KUI_project::KUI_project(QWidget* parent): QWidget(parent)
   screenShotLabel->setAttribute(Qt::WA_NativeWindow);
  
   
-  
+ 
+
   
   recordButton = new QPushButton(tr("Record"));
+  recordButton->setIcon(QIcon("../media-record.svg"));
+  
   stopButton = new QPushButton(tr("Stop Recording"));
+  stopButton->setIcon(QIcon("../media-playback-stop.svg"));
   stopButton->hide();
+  
   selectButton = new QPushButton(tr("Select Window"));
-  locationButton = new QPushButton(tr("Location"));
  
+  locationButton = new QPushButton(tr("Save As"));
+  locationButton->setIcon(QIcon(":/trolltech/styles/commonstyle/images/standardbutton-save-128.png"));
+  
+  aviButton = new QRadioButton("avi");
+  aviButton->setChecked(true);
+  
+  oggButton = new QRadioButton("ogg");
+  
+  QHBoxLayout *radio = new QHBoxLayout;
+  radio->addWidget(aviButton);
+  radio->addWidget(oggButton);
+  
+  
   
   address = new QLineEdit;
   address->setReadOnly(true);
@@ -54,13 +71,15 @@ KUI_project::KUI_project(QWidget* parent): QWidget(parent)
   connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(startRecording()));
   connect(stopButton, SIGNAL(clicked(bool)), this, SLOT(stopRecording()));
   connect(locationButton, SIGNAL(clicked(bool)), this, SLOT(location()));  
-  
+  connect(aviButton, SIGNAL(clicked(bool)), this, SLOT(aviChecked()));
+  connect(oggButton, SIGNAL(clicked(bool)), this, SLOT(oggChecked()));
   
   QVBoxLayout *buttonsLayout= new QVBoxLayout;
   buttonsLayout->addWidget(recordButton);
   buttonsLayout->addWidget(stopButton);
   buttonsLayout->addWidget(selectButton);
   buttonsLayout->addWidget(locationButton);
+  buttonsLayout->addLayout(radio);
   buttonsLayout->addStretch();
  
   
@@ -77,10 +96,17 @@ KUI_project::KUI_project(QWidget* parent): QWidget(parent)
   
   QApplication::syncX();
   display(screenShotLabel);
-  
-  
-  
 }
+
+
+KUI_project::~KUI_project()
+{
+  endGst();
+}
+
+
+
+
 
 
 void KUI_project::location()
@@ -107,18 +133,15 @@ void KUI_project::pathChenged()
     
 }
 
-void KUI_project::startRecording()
+void KUI_project::startRecording( )
 {
-  stopDisplay();
+  pausedDisplay();
   recordButton->hide();
   stopButton->show();
   
-  char *sta = strdup( path[0].toAscii().data() ); 
-  char location[strlen(sta)+10];
-  memset(location, 0, (strlen(sta)+10));
-  strcpy(location,sta);
-  strcat(location,"video.avi");
-  record(location);
+  
+  if (avi) { recordAvi(&path[0]); } else { recordOgg(&path[0]); }
+  
   
 }
 
@@ -128,10 +151,21 @@ void KUI_project::stopRecording()
   stopRec();
   stopButton->hide();
   recordButton->show();
-  display(screenShotLabel);
+  unpausedDisplay();
 
 }
 
+void KUI_project::aviChecked()
+{
+  aviButton->setChecked(true);
+  avi=true;
+}
+
+void KUI_project::oggChecked()
+{
+  oggButton->setChecked(true);
+  avi=false;
+}
 
 
 #include "KUI_project.moc"

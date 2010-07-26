@@ -15,8 +15,12 @@
  ****************************************************************************************/
 
 class QWidget;
+class QString;
 
-int record(char *location);
+int recordAvi(QString *path);
+int recordOgg(QString *path);
 int stopRec();
 int display(QWidget *widget);
-int stopDisplay();
+void pausedDisplay();
+void unpausedDisplay();
+int endGst();
