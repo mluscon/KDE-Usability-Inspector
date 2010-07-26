@@ -22,16 +22,13 @@
 #include <QWidget>
 
 
-#include "KUI_project.h"
 
 GstElement *pipeline, *pipeline2;
 
 int record(char *location) {
 
-	
 	GstElement *source, *queue, *rate, *color, *enc, *queue2, *mux, *sink;
-
-
+	
 	pipeline = gst_pipeline_new ("desktop-recorder");
 	if (!pipeline) { fputs("Pipeline error.",stderr); return 1; }
 
@@ -81,7 +78,6 @@ int record(char *location) {
 	  fputs("You need filesink plugin installed.",stderr);
 	  gst_object_unref(GST_OBJECT (pipeline));
 	  return 1; }
-
 
 
 	GstCaps *caps;
@@ -136,7 +132,7 @@ int record(char *location) {
 
 	 gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
-
+	
 	return 0;
 }
 
@@ -150,7 +146,7 @@ int stopRec() {
 
 int display(QWidget *widget) {
   
-	GstElement *source, *color, *sink;
+	GstElement *source, *color, *sink, *scale;
   
   	pipeline2 = gst_pipeline_new ("desktop-recorder");
 	if (!pipeline2) { fputs("Pipeline error.",stderr); return 1; }
@@ -160,23 +156,58 @@ int display(QWidget *widget) {
 
 	color = gst_element_factory_make ("ffmpegcolorspace",		 "color");
 	if (!color) { fputs("You need queue plugin installed.",stderr); return 1; }
-		
-	sink = gst_element_factory_make ("ximagesink",		 "sink");
-	if (!sink) { fputs("You need queue plugin installed.",stderr); return 1; }
+    
+	scale = gst_element_factory_make("videoscale", "scale");
+	if (!scale) { fputs("You need videoscale plugin installed.",stderr); return 1;}
+    
+	sink = gst_element_factory_make ("xvimagesink",		 "sink");
+	if (!sink) { fputs("You need ximagesink plugin installed.",stderr); return 1; }
 	
 	
 	gst_bin_add_many (GST_BIN (pipeline2), source, color, sink, NULL);
 
+	GstCaps *caps;
+
+	caps = gst_caps_new_simple ("video/x-raw-rgb",
+	  	     "framerate", GST_TYPE_FRACTION, 15, 1,
+	  	    // "width", G_TYPE_INT , 200,
+	  	    // "height", G_TYPE_INT, 200,
+	  	     "pixel-aspect-ratio", GST_TYPE_FRACTION, 1 , 1,
+		      NULL);
+
 	
-	if (!gst_element_link_many (source, color, sink, NULL)) {
+	if (!gst_element_link_many (source, color, sink,  NULL)) {
 	 		 fputs("Link many error.",stderr);
 	 		 return 1;
+	}		      
+		      
+		      
+/*	if (!gst_element_link_filtered (scale, sink, caps)) {
+		  fputs("Filter link error.",stderr);
+		  return 1;
 	}
+*/	
+	/*if (!gst_element_link_many (scale, sink, NULL)) {
+	 		 fputs("Link many error.",stderr);
+	 		 return 1;
+	}*/
 		 
+	gst_x_overlay_prepare_xwindow_id(GST_X_OVERLAY(sink));
+	
 	gst_element_set_state(sink, GST_STATE_READY);
 	gst_element_set_state (pipeline2, GST_STATE_PLAYING);
 	
+	QApplication::syncX();
 	gst_x_overlay_set_xwindow_id(GST_X_OVERLAY(sink),widget->winId());
+	
 	
 	return 0;
 }
+
+int stopDisplay() {
+  	//gst_element_send_event (pipeline2, gst_event_new_eos ());
+	//sleep(5);
+	gst_element_set_state(pipeline2, GST_STATE_PAUSED);
+	//gst_object_unref(GST_OBJECT (pipeline2));
+}
+  

@@ -43,6 +43,8 @@ class KUI_project : public QWidget
     
     QFileDialog *fileDiag;
     
+    QWidget *screenShotLabel;
+     
   public slots:
     void location();
     void pathChenged();

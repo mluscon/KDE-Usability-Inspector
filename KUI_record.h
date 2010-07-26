@@ -19,3 +19,4 @@ class QWidget;
 int record(char *location);
 int stopRec();
 int display(QWidget *widget);
+int stopDisplay();

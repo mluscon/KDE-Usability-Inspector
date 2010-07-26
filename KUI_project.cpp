@@ -27,17 +27,17 @@
 
 KUI_project::KUI_project(QWidget* parent): QWidget(parent)
 {
-  
+   
+
   setWindowTitle(tr("KDE Usability Inspector"));
   resize(320,240);
   path.push_back("/home/");
   
   
-  /*QWidget *screenShotLabel = new QWidget();
-  screenShotLabel->resize(200,200);
-  screenShotLabel->show();
-  display(screenShotLabel);
-  */
+  screenShotLabel = new QWidget();
+  screenShotLabel->setAttribute(Qt::WA_NativeWindow);
+ 
+  
   
   
   recordButton = new QPushButton(tr("Record"));
@@ -62,6 +62,7 @@ KUI_project::KUI_project(QWidget* parent): QWidget(parent)
   buttonsLayout->addWidget(selectButton);
   buttonsLayout->addWidget(locationButton);
   buttonsLayout->addStretch();
+ 
   
   QVBoxLayout *textLayout = new QVBoxLayout;
   textLayout->addWidget(address);
@@ -70,10 +71,12 @@ KUI_project::KUI_project(QWidget* parent): QWidget(parent)
   
   mainLayout->addLayout(buttonsLayout,0,0);  
   //mainLayout->addLayout(textLayout,1,0);
-  //mainLayout->addWidget(screenShotLabel,0,1);
+  mainLayout->addWidget(screenShotLabel,0,1);
   
   setLayout(mainLayout);
   
+  QApplication::syncX();
+  display(screenShotLabel);
   
   
   
@@ -106,6 +109,7 @@ void KUI_project::pathChenged()
 
 void KUI_project::startRecording()
 {
+  stopDisplay();
   recordButton->hide();
   stopButton->show();
   
@@ -120,10 +124,11 @@ void KUI_project::startRecording()
 
 void KUI_project::stopRecording()
 {
-  stopButton->hide();
-  recordButton->show();
   
   stopRec();
+  stopButton->hide();
+  recordButton->show();
+  display(screenShotLabel);
 
 }
 
