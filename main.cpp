@@ -1,3 +1,4 @@
+
 /****************************************************************************************
  * Copyright (c) 2010 Michal Luscon <mluscon@gmail.com>                                 *
  *                                                                                      *
@@ -18,17 +19,28 @@
 #include <QApplication>
 
 #include "KUI_project.h"
+#include "KUI_record.h"
+#include "KUI_select.h"
 
 int main (int argc, char *argv[])
 {
   
+  
   QApplication app(argc, argv);
+  
+
   gst_init(&argc, &argv); 
+  
   
   KUI_project kui;  
   kui.show();
+  display(kui.screenShotLabel);
   
   return app.exec();
   
  
+
+  
+  return 0;
+  
 }

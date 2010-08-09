@@ -20,7 +20,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
-
+#include <iostream>
 
 #define NIL (0)
 
@@ -66,10 +66,7 @@ int selectWindow(unsigned int *startX, unsigned int *startY, unsigned int *endX,
 
   XUngrabPointer(dpy, CurrentTime);      /* Done with pointer */
 
-  /*if (!descend || (target_win == root))
-    return(target_win);
-*/
-  //target_win = Find_Client(dpy, root, target_win);
+
   
   XWindowAttributes selWin;
   XGetWindowAttributes(dpy, target_win, &selWin);
@@ -79,6 +76,10 @@ int selectWindow(unsigned int *startX, unsigned int *startY, unsigned int *endX,
   *endX = selWin.x + selWin.width;
   *endY = selWin.y + selWin.height;
   
-  
+  if (*startX%2==1) { *startX=*startX-1; }
+  if (*startY%2==1) { *startY=*startY-1; }
+  if (*endX%2==1) { *endX=*endX+1; }
+  if (*endY%2==1) { *endY=*endY-1; }
+      
   return 0;
 }

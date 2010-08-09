@@ -17,10 +17,16 @@
 class QWidget;
 class QString;
 
-int recordAvi(QString *path);
-int recordOgg(QString *path);
+int recordAvi(QString *path, int fps, unsigned int startX, unsigned int startY, unsigned int endX, unsigned int endY);
+
+int recordOgg(QString *path, int fps, int startX, int startY, int endX, int endY);
+
 int stopRec();
+
 int display(QWidget *widget);
+
 void pausedDisplay();
+
 void unpausedDisplay();
-int endGst();
+
+void endGst();

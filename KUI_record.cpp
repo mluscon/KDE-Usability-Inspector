@@ -21,20 +21,23 @@
 #include <QApplication>
 #include <QWidget>
 #include <cstring>
+#include <iostream>
 
 
+GstElement *pipeline, *pipeline2, *enc;
 
-GstElement *pipeline, *pipeline2;
-
-int recordAvi(QString *path) {
-  
+int recordAvi(QString *path, int fps, unsigned int startX, unsigned int startY, unsigned int endX, unsigned int endY) {
+	
+	
 	char *sta = strdup( path[0].toAscii().data() ); 
-	char location[strlen(sta)+10];
-	memset(location, 0, (strlen(sta)+10));
+	char location[ strlen(sta)+10 ];
+	memset(location, 0, ( strlen(sta)+10) );
 	strcpy(location,sta);
 	strcat(location,"video.avi");
-
-	GstElement *source, *queue, *rate, *color, *enc, *queue2, *mux, *sink;
+	
+	
+	
+	GstElement *source, *queue, *rate, *color, *queue2, *mux, *sink;
 	
 	pipeline = gst_pipeline_new ("desktop-recorder");
 	if (!pipeline) { fputs("Pipeline error.",stderr); return 1; }
@@ -90,10 +93,10 @@ int recordAvi(QString *path) {
 	GstCaps *caps;
 
 	caps = gst_caps_new_simple ("video/x-raw-rgb",
-	  	     "framerate", GST_TYPE_FRACTION, 12, 1,
+	  	     "framerate", GST_TYPE_FRACTION, fps, 1,
 	  	    // "width", G_TYPE_INT , 200,
 	  	    // "height", G_TYPE_INT, 200,
-	  	     "pixel-aspect-ratio", GST_TYPE_FRACTION, 1 , 1,
+	  	    // "pixel-aspect-ratio", GST_TYPE_FRACTION, 1 , 1,
 		      NULL);
 
 	gst_bin_add_many (GST_BIN (pipeline), source, queue, rate, color, enc, queue2, mux, sink, NULL);
@@ -110,19 +113,31 @@ int recordAvi(QString *path) {
 	}
 
 
+	int x=startX;
+	int y=startY;
+	int ex=endX;
+	int ey=endY;
+	
 	// g_object_set (G_OBJECT(source), "num-buffers", 100, NULL);
 	 g_object_set (G_OBJECT(source), "use-damage", true , NULL);
-	/* g_object_set (G_OBJECT(source), "startx", 0 , NULL);
-	 g_object_set (G_OBJECT(source), "starty", 0 , NULL);
-	 g_object_set (G_OBJECT(source), "endx", 400 , NULL);
-	 g_object_set (G_OBJECT(source), "endy", 400 , NULL);
-*/
+	 g_object_set (G_OBJECT(source), "startx", startX , NULL);
+	 g_object_set (G_OBJECT(source), "starty", startY , NULL);
+	 g_object_set (G_OBJECT(source), "endx", endX , NULL);
+	 g_object_set (G_OBJECT(source), "endy", endY , NULL);
+
 	 g_object_set (G_OBJECT(queue), "max-size-buffers", 25 , NULL);
 	 g_object_set (G_OBJECT(queue), "max-size-time", 0 , NULL);
 	 g_object_set (G_OBJECT(queue), "max-size-bytes", 0 , NULL);
-	 g_object_set (G_OBJECT(queue), "min-threshold-buffers", 10 , NULL);
+	 g_object_set (G_OBJECT(queue), "min-threshold-buffers", 0 , NULL);
 	 g_object_set (G_OBJECT(queue), "min-threshold-time", 0 , NULL);
 	 g_object_set (G_OBJECT(queue), "min-threshold-bytes", 0 , NULL);
+
+	 g_object_set (G_OBJECT(queue2), "max-size-buffers", 100 , NULL);
+	 g_object_set (G_OBJECT(queue2), "max-size-time", 0 , NULL);
+	 g_object_set (G_OBJECT(queue2), "max-size-bytes", 0 , NULL);
+	 g_object_set (G_OBJECT(queue2), "min-threshold-buffers", 0 , NULL);
+	 g_object_set (G_OBJECT(queue2), "min-threshold-time", 0 , NULL);
+	 g_object_set (G_OBJECT(queue2), "min-threshold-bytes", 0 , NULL);
 /*
 	 g_object_set (G_OBJECT(enc), "drop-frames", false , NULL);
 	 g_object_set (G_OBJECT(enc), "rate-buffer", 1000 , NULL);
@@ -131,7 +146,7 @@ int recordAvi(QString *path) {
 */
 
 	 //g_object_set (G_OBJECT(sink), "buffer-mode", 0 , NULL);
-	 g_object_set (G_OBJECT (sink), "location", location, NULL);
+	 g_object_set (G_OBJECT (sink), "location", location,  NULL);
 	 //g_object_set (G_OBJECT (sink), "sync", true, NULL);*/
 	 // g_object_set (G_OBJECT (sink), "preroll-queue-len", 10, NULL);
 
@@ -143,7 +158,7 @@ int recordAvi(QString *path) {
 	return 0;
 }
 
-int recordOgg(QString *path) {
+int recordOgg(QString *path, int fps, int startX, int startY, int endX, int endY) {
 
 	char *sta = strdup( path[0].toAscii().data() ); 
 	char location[strlen(sta)+10];
@@ -151,7 +166,7 @@ int recordOgg(QString *path) {
 	strcpy(location,sta);
 	strcat(location,"video.ogg");
 
-	GstElement *source, *queue, *rate, *color, *enc, *queue2, *mux, *sink;
+	GstElement *source, *queue, *rate, *color, *queue2, *mux, *sink;
 	
 	pipeline = gst_pipeline_new ("desktop-recorder");
 	if (!pipeline) { fputs("Pipeline error.",stderr); return 1; }
@@ -179,13 +194,13 @@ int recordOgg(QString *path) {
 	  gst_object_unref(GST_OBJECT (pipeline));
 	  return 1; }
 
-	enc = gst_element_factory_make ("xvidenc", "xvid");
+	enc = gst_element_factory_make ("theoraenc", "theora");
 	if (!enc) { 
 	  fputs("You need theoraenc plugin installed.",stderr);
 	  gst_object_unref(GST_OBJECT (pipeline));
 	  return 1; }
 
-	mux = gst_element_factory_make ("avimux", "multiplex");
+	mux = gst_element_factory_make ("oggmux", "multiplex");
 	if (!mux) {  
 	  fputs("You need avimux plugin installed.", stderr);
 	  gst_object_unref(GST_OBJECT (pipeline));
@@ -207,13 +222,13 @@ int recordOgg(QString *path) {
 	GstCaps *caps;
 
 	caps = gst_caps_new_simple ("video/x-raw-rgb",
-	  	     "framerate", GST_TYPE_FRACTION, 12, 1,
+	  	     "framerate", GST_TYPE_FRACTION, fps, 1,
 	  	    // "width", G_TYPE_INT , 200,
 	  	    // "height", G_TYPE_INT, 200,
 	  	     "pixel-aspect-ratio", GST_TYPE_FRACTION, 1 , 1,
 		      NULL);
 
-	gst_bin_add_many (GST_BIN (pipeline), source, queue, rate, color, enc, queue2, mux, sink, NULL);
+	gst_bin_add_many (GST_BIN (pipeline), source, queue, color, enc, queue2, mux, sink, NULL);
 
 
 	if (!gst_element_link_filtered (source, color, caps)) {
@@ -221,7 +236,7 @@ int recordOgg(QString *path) {
 		  return 1;
 	}
 
-	if (!gst_element_link_many (color, queue, rate, enc, queue2, mux, sink, NULL)) {
+	if (!gst_element_link_many (color, queue, enc, queue2, mux, sink, NULL)) {
 	 		 fputs("Link many error.",stderr);
 	 		 return 1;
 	}
@@ -229,15 +244,22 @@ int recordOgg(QString *path) {
 
 	// g_object_set (G_OBJECT(source), "num-buffers", 100, NULL);
 	 g_object_set (G_OBJECT(source), "use-damage", true , NULL);
-	/* g_object_set (G_OBJECT(source), "startx", 0 , NULL);
-	 g_object_set (G_OBJECT(source), "starty", 0 , NULL);
-	 g_object_set (G_OBJECT(source), "endx", 400 , NULL);
-	 g_object_set (G_OBJECT(source), "endy", 400 , NULL);
-*/
-	 g_object_set (G_OBJECT(queue), "max-size-buffers", 25 , NULL);
+	 g_object_set (G_OBJECT(source), "startx", startX , NULL);
+	 g_object_set (G_OBJECT(source), "starty", startY , NULL);
+	 g_object_set (G_OBJECT(source), "endx", endX , NULL);
+	 g_object_set (G_OBJECT(source), "endy", endY , NULL);
+	 
+	 g_object_set (G_OBJECT(queue), "max-size-buffers", 50 , NULL);
 	 g_object_set (G_OBJECT(queue), "max-size-time", 0 , NULL);
 	 g_object_set (G_OBJECT(queue), "max-size-bytes", 0 , NULL);
-	 g_object_set (G_OBJECT(queue), "min-threshold-buffers", 10 , NULL);
+	 g_object_set (G_OBJECT(queue), "min-threshold-buffers", 0 , NULL);
+	 g_object_set (G_OBJECT(queue), "min-threshold-time", 0 , NULL);
+	 g_object_set (G_OBJECT(queue), "min-threshold-bytes", 0 , NULL);
+	 
+	 g_object_set (G_OBJECT(queue), "max-size-buffers", 100 , NULL);
+	 g_object_set (G_OBJECT(queue), "max-size-time", 0 , NULL);
+	 g_object_set (G_OBJECT(queue), "max-size-bytes", 0 , NULL);
+	 g_object_set (G_OBJECT(queue), "min-threshold-buffers", 0 , NULL);
 	 g_object_set (G_OBJECT(queue), "min-threshold-time", 0 , NULL);
 	 g_object_set (G_OBJECT(queue), "min-threshold-bytes", 0 , NULL);
 /*
@@ -264,15 +286,18 @@ int recordOgg(QString *path) {
 
 int stopRec() {
 	
-	gst_element_send_event (pipeline, gst_event_new_eos ());
-	//sleep(5);
+	
+	gst_element_send_event (enc, gst_event_new_eos ());
+	gst_element_send_event(pipeline, gst_event_new_flush_stop());
 	gst_element_set_state(pipeline, GST_STATE_NULL);
 	gst_object_unref(GST_OBJECT (pipeline));
+	
+	pipeline=NULL;
 }
 
 int display(QWidget *widget) {
   
-	GstElement *source, *color, *sink, *scale;
+	GstElement *source, *color, *sink, *queue;
   
   	pipeline2 = gst_pipeline_new ("desktop-recorder");
 	if (!pipeline2) { fputs("Pipeline error.",stderr); return 1; }
@@ -283,40 +308,34 @@ int display(QWidget *widget) {
 	color = gst_element_factory_make ("ffmpegcolorspace",		 "color");
 	if (!color) { fputs("You need queue plugin installed.",stderr); return 1; }
     
-	scale = gst_element_factory_make("videoscale", "scale");
-	if (!scale) { fputs("You need videoscale plugin installed.",stderr); return 1;}
+	queue = gst_element_factory_make("queue", "queue");
+	if (!queue) { fputs("You need videoscale plugin installed.",stderr); return 1;}
     
 	sink = gst_element_factory_make ("xvimagesink",		 "sink");
 	if (!sink) { fputs("You need ximagesink plugin installed.",stderr); return 1; }
 	
 	
-	gst_bin_add_many (GST_BIN (pipeline2), source, color, sink, NULL);
+	gst_bin_add_many (GST_BIN (pipeline2), source, color, sink, queue,  NULL);
 
 	GstCaps *caps;
 
 	caps = gst_caps_new_simple ("video/x-raw-rgb",
-	  	     "framerate", GST_TYPE_FRACTION, 15, 1,
+	  	     "framerate", GST_TYPE_FRACTION, 10, 1,
 	  	    // "width", G_TYPE_INT , 200,
 	  	    // "height", G_TYPE_INT, 200,
 	  	     "pixel-aspect-ratio", GST_TYPE_FRACTION, 1 , 1,
 		      NULL);
 
-	
-	if (!gst_element_link_many (source, color, sink,  NULL)) {
-	 		 fputs("Link many error.",stderr);
-	 		 return 1;
-	}		      
-		      
-		      
-/*	if (!gst_element_link_filtered (scale, sink, caps)) {
+			      
+	if (!gst_element_link_filtered (source, color, caps)) {
 		  fputs("Filter link error.",stderr);
 		  return 1;
 	}
-*/	
-	/*if (!gst_element_link_many (scale, sink, NULL)) {
+
+	if (!gst_element_link_many (color, queue, sink, NULL)) {
 	 		 fputs("Link many error.",stderr);
 	 		 return 1;
-	}*/
+	}
 		 
 	gst_x_overlay_prepare_xwindow_id(GST_X_OVERLAY(sink));
 	
@@ -340,14 +359,14 @@ void unpausedDisplay()
   gst_element_set_state(pipeline2, GST_STATE_PLAYING);
 }
 
-int endGst()
+void endGst()
 {
- /* gst_element_set_state(pipeline, GST_STATE_NULL);
-  gst_object_unref(GST_OBJECT (pipeline));
-  */
+ 
   gst_element_send_event (pipeline2, gst_event_new_eos ());
   gst_element_set_state(pipeline2, GST_STATE_NULL);
   gst_object_unref(GST_OBJECT (pipeline2));
+  if (pipeline!=NULL) { gst_object_unref(pipeline); }
+  
 }
 
 

@@ -20,27 +20,31 @@
 #include <QPixmap>
 #include <QApplication>
 #include <QString>
-#include <cstring>
+#include <QX11Info>
+
 
 #include "KUI_project.h"
 #include "KUI_record.h"
+#include "KUI_select.h"
 
 KUI_project::KUI_project(QWidget* parent): QWidget(parent)
 {
    
   avi=true;
   setWindowTitle(tr("KDE Usability Inspector"));
-  resize(320,240);
-  path.push_back("/home/");
+  resize(360,240);
+  path.push_back(QDir::homePath());
+  path[0].push_back("/");
   
+  fps=10;
+  sX=0;
+  sY=0;
+  eX=0;
+  eY=0;  
   
   screenShotLabel = new QWidget();
   screenShotLabel->setAttribute(Qt::WA_NativeWindow);
  
-  
- 
-
-  
   recordButton = new QPushButton(tr("Record"));
   recordButton->setIcon(QIcon("../media-record.svg"));
   
@@ -58,11 +62,22 @@ KUI_project::KUI_project(QWidget* parent): QWidget(parent)
   
   oggButton = new QRadioButton("ogg");
   
-  QHBoxLayout *radio = new QHBoxLayout;
-  radio->addWidget(aviButton);
-  radio->addWidget(oggButton);
+  fpsChanger = new QSpinBox();
+  fpsChanger->setRange(1,25);
+  fpsChanger->setValue(fps);
+  
+  fpsLabel = new QLabel(tr("fps"));
+   
   
   
+  QHBoxLayout *settingsLayout = new QHBoxLayout;
+  settingsLayout->addWidget(aviButton);
+  settingsLayout->addWidget(oggButton);
+  settingsLayout->addWidget(fpsChanger);
+  settingsLayout->addWidget(fpsLabel); 
+  
+  
+   
   
   address = new QLineEdit;
   address->setReadOnly(true);
@@ -70,16 +85,19 @@ KUI_project::KUI_project(QWidget* parent): QWidget(parent)
 
   connect(recordButton, SIGNAL(clicked(bool)), this, SLOT(startRecording()));
   connect(stopButton, SIGNAL(clicked(bool)), this, SLOT(stopRecording()));
+  connect(selectButton, SIGNAL(clicked(bool)), this, SLOT(winSelect()));
   connect(locationButton, SIGNAL(clicked(bool)), this, SLOT(location()));  
   connect(aviButton, SIGNAL(clicked(bool)), this, SLOT(aviChecked()));
   connect(oggButton, SIGNAL(clicked(bool)), this, SLOT(oggChecked()));
+  connect(fpsChanger, SIGNAL(valueChanged(int)), this, SLOT(fpsChanged()));
+  
   
   QVBoxLayout *buttonsLayout= new QVBoxLayout;
   buttonsLayout->addWidget(recordButton);
   buttonsLayout->addWidget(stopButton);
   buttonsLayout->addWidget(selectButton);
   buttonsLayout->addWidget(locationButton);
-  buttonsLayout->addLayout(radio);
+  buttonsLayout->addLayout(settingsLayout);
   buttonsLayout->addStretch();
  
   
@@ -95,7 +113,7 @@ KUI_project::KUI_project(QWidget* parent): QWidget(parent)
   setLayout(mainLayout);
   
   QApplication::syncX();
-  display(screenShotLabel);
+ 
 }
 
 
@@ -115,6 +133,8 @@ void KUI_project::location()
     
     fileDiag->setFileMode(QFileDialog::DirectoryOnly);
     fileDiag->setDirectory(path[0]);
+    
+    
     
     connect(fileDiag, SIGNAL(currentChanged(QString)), this, SLOT(pathChenged()));
     
@@ -140,7 +160,11 @@ void KUI_project::startRecording( )
   stopButton->show();
   
   
-  if (avi) { recordAvi(&path[0]); } else { recordOgg(&path[0]); }
+  if (avi) { 
+    recordAvi(&path[0], fps, sX, sY, eX, eY); 
+  } else { 
+    recordOgg(&path[0], fps, sX, sY, eX, eY);
+  }
   
   
 }
@@ -155,6 +179,14 @@ void KUI_project::stopRecording()
 
 }
 
+void KUI_project::winSelect()
+{
+  selectWindow(&sX, &sY, &eX, &eY);
+}
+
+
+
+
 void KUI_project::aviChecked()
 {
   aviButton->setChecked(true);
@@ -165,6 +197,11 @@ void KUI_project::oggChecked()
 {
   oggButton->setChecked(true);
   avi=false;
+}
+
+void KUI_project::fpsChanged()
+{
+  fps=fpsChanger->value();
 }
 
 
