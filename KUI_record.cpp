@@ -286,7 +286,7 @@ int recordOgg(QString *path, int fps, int startX, int startY, int endX, int endY
 
 int stopRec() {
 	
-	
+	gst_element_send_event(pipeline, gst_event_new_flush_start());
 	gst_element_send_event (enc, gst_event_new_eos ());
 	gst_element_send_event(pipeline, gst_event_new_flush_stop());
 	gst_element_set_state(pipeline, GST_STATE_NULL);
