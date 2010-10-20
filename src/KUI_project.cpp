@@ -16,6 +16,7 @@
 
 #include "KUI_project.h"
 #include "KUI_mainToolBar.h"
+#include "KUI_screenShotLabel.h"
 
 #include <KAction>
 #include <KLocale>
@@ -29,24 +30,32 @@
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
+  this->resize(400,300);
+  
   collection = new KActionCollection(this);
   
   menuBar = new KMenuBar;
+  setupMenuFile();
+  setupMenuSettings();
+  menuBar->addMenu(helpMenu());
+  this->setMenuBar(menuBar);
+  
+  KToolBar *tools = new KToolBar(i18n("&Tools"),this);
+  tools->addAction(collection->action("open_file"));
+  tools->addAction(collection->action("save_file"));
+  tools->setToolButtonStyle(Qt::ToolButtonIconOnly);
+  
+  screenShotLabel *screen = new screenShotLabel(this);
+  this->setCentralWidget(screen);
   
   mainToolBar *playBar = new mainToolBar(this);
   playBar->setAccessibleDescription("pica Bar");
   this->addToolBar(Qt::BottomToolBarArea, playBar);
-  
-  setupMenuFile();
-  //setupMenuHelp();
-  menuBar->addMenu(helpMenu());
-  
-  this->setMenuBar(menuBar);
-  
 }
+
 void KUI_project::setupMenuFile()
 {
-  //File menu
+  
   KMenu *fileMenu = new KMenu(i18n("&File"),this);
    
   KAction *action = KStandardAction::open(this, SLOT(openFileSlot), collection);
@@ -63,10 +72,17 @@ void KUI_project::setupMenuFile()
   action = KStandardAction::quit(this, SLOT(close()), collection);
   fileMenu->addAction(collection->addAction("quit", action)); 
   
-  menuBar->addMenu(fileMenu);
-  
-  
+  menuBar->addMenu(fileMenu);  
 }
+
+void KUI_project::setupMenuSettings()
+{
+  KMenu *settingsMenu = new KMenu(i18n("&Settings"),this);
+  
+  menuBar->addMenu(settingsMenu);
+
+}
+
 
 void KUI_project::saveFileSlot()
 {

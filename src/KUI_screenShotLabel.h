@@ -14,33 +14,30 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
  ****************************************************************************************/
 
-#ifndef KUI_PROJECT_H
-#define KUI_PROJECT_H
+#ifndef SCREENSHOT_H
+#define SCREENSHOT_H
 
-#include <KMainWindow>
-#include <KActionCollection>
+#include <QLabel>
 
-class KUI_project : public KMainWindow
+class screenShotLabel : public QLabel
 {
   Q_OBJECT
   
   public:
-    KUI_project(QWidget *parent=0);
-    
-  private:
-    void setupMenuFile();
-    void setupMenuSettings();
-    KMenuBar *menuBar; 
-    KActionCollection *collection;
-    
-    
+    screenShotLabel(QWidget *parent);
+    void resizeEvent(QResizeEvent *event);
+  
   private slots:
-    void saveFileSlot();
-    void openFileSlot();
-    void saveAsFileSlot();
-   
+    void pictureUpdate();
+  
+  private:
+    QTimer *timer;
+    QPixmap screenPicture;
+
 };
-    
-    
-    
+
+
+
+
+
 #endif

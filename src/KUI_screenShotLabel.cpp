@@ -1,4 +1,4 @@
-/****************************************************************************************
+  /****************************************************************************************
  * Copyright (c) 2010 Michal Luscon <mluscon@gmail.com>                                 *
  *                                                                                      *
  * This program is free software; you can redistribute it and/or modify it under        *
@@ -14,33 +14,38 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
  ****************************************************************************************/
 
-#ifndef KUI_PROJECT_H
-#define KUI_PROJECT_H
+#include "KUI_screenShotLabel.h"
 
-#include <KMainWindow>
-#include <KActionCollection>
+#include <QApplication>
+#include <QPixmap>
+#include <QDesktopWidget>
+#include <QTimer>
 
-class KUI_project : public KMainWindow
+screenShotLabel::screenShotLabel(QWidget* parent): QLabel(parent)
 {
-  Q_OBJECT
+  this->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Ignored);
   
-  public:
-    KUI_project(QWidget *parent=0);
-    
-  private:
-    void setupMenuFile();
-    void setupMenuSettings();
-    KMenuBar *menuBar; 
-    KActionCollection *collection;
-    
-    
-  private slots:
-    void saveFileSlot();
-    void openFileSlot();
-    void saveAsFileSlot();
-   
-};
-    
-    
-    
-#endif
+  timer = new QTimer(this);
+  timer->start(1000);
+  connect(timer, SIGNAL(timeout()), this, SLOT(pictureUpdate()));
+  
+  pictureUpdate();
+}
+
+void screenShotLabel::resizeEvent(QResizeEvent* event)
+{
+    pictureUpdate();
+    QWidget::resizeEvent(event);
+}
+
+
+
+void screenShotLabel::pictureUpdate()
+{
+  screenPicture = QPixmap::grabWindow(QApplication::desktop()->winId());
+  
+  QPixmap show;
+  show = screenPicture.scaled(this->width(),this->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation); 
+  this->setPixmap(show);
+}
+
