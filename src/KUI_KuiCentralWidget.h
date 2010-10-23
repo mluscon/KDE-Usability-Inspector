@@ -10,32 +10,38 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
  *                                                                                      *
- * You should have received a copy of the GNU General Public License along with         *
+ *  You should have received a copy of the GNU General Public License along with        *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
- ****************************************************************************************/
+****************************************************************************************/
 
-#ifndef KUI_SCREENSHOT_H
-#define KUI_SCREENSHOT_H
+#ifndef KUI_KUICENTRALWIDGET_H
+#define KUI_KUICENTRALWIDGET_H
 
-#include <QLabel>
+#include "KUI_screenShotLabel.h"
 
-class screenShotLabel : public QLabel
+#include <QWidget>
+#include <Phonon/VideoWidget>
+
+class KuiCentralWidget : public QWidget
 {
   Q_OBJECT
   
   public:
-    screenShotLabel(QWidget *parent);
-    void resizeEvent(QResizeEvent *event);
-  
-  public slots:
-    void pictureUpdate();
+    KuiCentralWidget(QWidget *parent);
   
   private:
-    QTimer *timer;
-    QPixmap screenPixmap;
+    screenShotLabel *screen;
+    Phonon::VideoWidget *vwidget;
     
-
+  public slots:
+    void desktop(bool);
+    void camera(bool);
 };
+
+
+
+
+
 
 
 

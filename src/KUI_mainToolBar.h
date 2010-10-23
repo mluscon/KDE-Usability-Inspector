@@ -10,14 +10,19 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
  *                                                                                      *
- * You should have received a copy of the GNU General Public License along with         *
+ *  You should have received a copy of the GNU General Public License along with        *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
- ****************************************************************************************/
+****************************************************************************************/
 
-#ifndef MAINTOOLBAR_H
-#define MAINTOOLBAR_H
+#ifndef KUI_MAINTOOLBAR_H
+#define KUI_MAINTOOLBAR_H
 
 #include <KToolBar>
+#include <KActionCollection>
+#include <QSlider>
+#include <KSystemTrayIcon>
+
+enum Mode { defaultMode, playingMode, pauseMode, stopMode };
 
 class mainToolBar : public KToolBar
 {
@@ -26,12 +31,26 @@ class mainToolBar : public KToolBar
   public:
     mainToolBar(QWidget *parent);
   
-  private slots:
+  private:
+    int startx;
+    int starty;
+    int endx;
+    int endy;
+    KActionCollection *toolBarCollection;
+    QSlider *timeSlider;
+    void updateInterface(Mode );
+    KSystemTrayIcon *trayIcon;
+    
+  public slots:
+    void aimSlot();
     void playSlot();
     void recordSlot();
     void pauseSlot();
     void stopSlot();
-    void anotateSlot();
+    void lockSlot();
+    void unhideSlot();
+    
+    
 };
 
 

@@ -1,22 +1,22 @@
-  /****************************************************************************************
-  * Copyright (c) 2010 Michal Luscon <mluscon@gmail.com>                                 *
-  *                                                                                      *
-  * This program is free software; you can redistribute it and/or modify it under        *
-  * the terms of the GNU General Public License as published by the Free Software        *
-  * Foundation; either version 2 of the License, or (at your option) any later           *
-  * version.                                                                             *
-  *                                                                                      *
-  * This program is distributed in the hope that it will be useful, but WITHOUT ANY      *
-  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
-  * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
-  *                                                                                      *
-  * You should have received a copy of the GNU General Public License along with         *
-  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
-  ****************************************************************************************/
+/****************************************************************************************
+* Copyright (c) 2010 Michal Luscon <mluscon@gmail.com>                                 *
+*                                                                                      *
+* This program is free software; you can redistribute it and/or modify it under        *
+* the terms of the GNU General Public License as published by the Free Software        *
+* Foundation; either version 2 of the License, or (at your option) any later           *
+* version.                                                                             *
+*                                                                                      *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY      *
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
+* PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
+*                                                                                      *
+* You should have received a copy of the GNU General Public License along with         *
+* this program.  If not, see <http://www.gnu.org/licenses/>.                           *
+****************************************************************************************/
 
 #include "KUI_project.h"
 #include "KUI_mainToolBar.h"
-#include "KUI_screenShotLabel.h"
+
 
 #include <KAction>
 #include <KLocale>
@@ -26,16 +26,22 @@
 #include <KMenu>
 #include <KApplication>
 #include <KAboutApplicationDialog>
+#include <QPushButton>
+
 
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
   this->resize(400,300);
+  KSystemTrayIcon *trayIcon = new KSystemTrayIcon("media-playback-stop",0);
+  trayIcon->setVisible(false);
   
   collection = new KActionCollection(this);
+  defaultCentral = new KuiCentralWidget(this);
   
   menuBar = new KMenuBar;
   setupMenuFile();
+  setupMenuWindow();
   setupMenuSettings();
   menuBar->addMenu(helpMenu());
   this->setMenuBar(menuBar);
@@ -45,8 +51,10 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   tools->addAction(collection->action("save_file"));
   tools->setToolButtonStyle(Qt::ToolButtonIconOnly);
   
-  screenShotLabel *screen = new screenShotLabel(this);
-  this->setCentralWidget(screen);
+  
+  this->setCentralWidget(defaultCentral);
+  
+  
   
   mainToolBar *playBar = new mainToolBar(this);
   playBar->setAccessibleDescription("pica Bar");
@@ -72,15 +80,37 @@ void KUI_project::setupMenuFile()
   action = KStandardAction::quit(this, SLOT(close()), collection);
   fileMenu->addAction(collection->addAction("quit", action)); 
   
-  menuBar->addMenu(fileMenu);  
+  menuBar->addMenu(fileMenu);
 }
+
+void KUI_project::setupMenuWindow()
+{
+  KMenu *windowMenu = new KMenu(i18n("&Window"),this);
+  
+  KAction *showDesktop = new KAction(i18n("Show &Desktop"),this);
+  showDesktop->setCheckable(true);
+  showDesktop->setChecked(true);
+  connect(showDesktop, SIGNAL(triggered(bool)), defaultCentral, SLOT(desktop(showDesktop->isChecked())));
+  windowMenu->addAction(showDesktop);
+  
+  KAction *showCamera = new KAction(i18n("Show &Camera"),this);
+  showCamera->setCheckable(true);
+  showCamera->setChecked(true);
+  windowMenu->addAction(showCamera);
+  connect(showCamera, SIGNAL(triggered(bool)), defaultCentral, SLOT(camera(showCamera->isChecked())));
+  menuBar->addMenu(windowMenu);
+}
+
+
 
 void KUI_project::setupMenuSettings()
 {
   KMenu *settingsMenu = new KMenu(i18n("&Settings"),this);
   
   menuBar->addMenu(settingsMenu);
-
+  
+  KAction *action = KStandardAction::configureToolbars(this, SLOT(), collection);
+  settingsMenu->addAction(collection->addAction("configure_toolbars", action));
 }
 
 

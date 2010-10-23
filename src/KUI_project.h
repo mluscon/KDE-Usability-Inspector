@@ -10,15 +10,18 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
  *                                                                                      *
- * You should have received a copy of the GNU General Public License along with         *
+ *  You should have received a copy of the GNU General Public License along with        *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
- ****************************************************************************************/
+****************************************************************************************/
 
 #ifndef KUI_PROJECT_H
 #define KUI_PROJECT_H
 
 #include <KMainWindow>
 #include <KActionCollection>
+
+#include "KUI_KuiCentralWidget.h"
+
 
 class KUI_project : public KMainWindow
 {
@@ -29,16 +32,21 @@ class KUI_project : public KMainWindow
     
   private:
     void setupMenuFile();
+    void setupMenuWindow();
     void setupMenuSettings();
     KMenuBar *menuBar; 
     KActionCollection *collection;
+    KuiCentralWidget *defaultCentral;
+    
     
     
   private slots:
+
     void saveFileSlot();
     void openFileSlot();
     void saveAsFileSlot();
-   
+    
+
 };
     
     

@@ -10,35 +10,51 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
  *                                                                                      *
- * You should have received a copy of the GNU General Public License along with         *
+ *  You should have received a copy of the GNU General Public License along with        *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
- ****************************************************************************************/
+****************************************************************************************/
 
-#ifndef KUI_SCREENSHOT_H
-#define KUI_SCREENSHOT_H
+#include "KUI_KuiCentralWidget.h"
+#include "KUI_screenShotLabel.h"
 
-#include <QLabel>
 
-class screenShotLabel : public QLabel
+#include <Phonon/MediaObject>
+#include <QGridLayout>
+
+KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
 {
-  Q_OBJECT
   
-  public:
-    screenShotLabel(QWidget *parent);
-    void resizeEvent(QResizeEvent *event);
+  QGridLayout *centralLayout = new QGridLayout(this);
   
-  public slots:
-    void pictureUpdate();
-  
-  private:
-    QTimer *timer;
-    QPixmap screenPixmap;
-    
-
-};
-
-
-
+  Phonon::MediaObject *media = new Phonon::MediaObject(parent);
+  vwidget = new Phonon::VideoWidget(parent);
+  Phonon::createPath(media, vwidget);
+   
+  screen = new screenShotLabel(this);
+   
+  centralLayout->addWidget(screen,0,0);
+  centralLayout->addWidget(vwidget,0,1);
+  this->setLayout(centralLayout);
+}
 
 
-#endif
+void KuiCentralWidget::camera(bool checked)
+{
+  if (checked) {
+    screen->hide();
+  } else {
+    screen->show();
+  }
+
+}
+
+void KuiCentralWidget::desktop(bool checked)
+{
+
+}
+
+
+
+
+
+
