@@ -14,14 +14,4 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
 ****************************************************************************************/
 
-#include "KUI_KuiCentralWidget.h"
-#include "KUI_screenShotLabel.h"
-
-#include <Phonon/VideoWidget>
-#include <Phonon/MediaObject>
-#include <QGridLayout>
-
-
-
-
-
+int recordKUI(int startX, int startY, int endX, int endY );

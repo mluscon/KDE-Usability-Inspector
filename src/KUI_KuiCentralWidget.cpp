@@ -15,46 +15,45 @@
 ****************************************************************************************/
 
 #include "KUI_KuiCentralWidget.h"
-#include "KUI_screenShotLabel.h"
 
 
-#include <Phonon/MediaObject>
 #include <QGridLayout>
+
+#include <QApplication>
+
 
 KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
 {
-  
   QGridLayout *centralLayout = new QGridLayout(this);
   
-  Phonon::MediaObject *media = new Phonon::MediaObject(parent);
-  vwidget = new Phonon::VideoWidget(parent);
-  Phonon::createPath(media, vwidget);
-   
+  camera = new cameraWidget(this);
   screen = new screenShotLabel(this);
    
   centralLayout->addWidget(screen,0,0);
-  centralLayout->addWidget(vwidget,0,1);
+  centralLayout->addWidget(camera,0,1);
   this->setLayout(centralLayout);
 }
 
 
-void KuiCentralWidget::camera(bool checked)
+void KuiCentralWidget::cameraVis()
 {
-  if (checked) {
-    screen->hide();
+  if (camera->isHidden()) {
+    camera->show();
   } else {
-    screen->show();
+    camera->hide();
   }
 
 }
 
-void KuiCentralWidget::desktop(bool checked)
+void KuiCentralWidget::screenVis()
 {
+  if (screen->isHidden()) {
+    screen->show();
+  } else {
+    screen->hide();
+  }
 
 }
-
-
-
 
 
 

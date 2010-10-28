@@ -17,19 +17,28 @@
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
+#include <gst/gst.h>
 
 #include "KUI_mainToolBar.h"
 #include "KUI_project.h"
  
 int main (int argc, char *argv[])
 {
+  
   KAboutData aboutData( "KUI_project", "KUI_project",
       ki18n("KUI_project"), "1.0",
       ki18n("Usabality inspector"),
-      KAboutData::License_GPL,
+      KAboutData::License_GPL_V2,
       ki18n("Copyright (c) 2007 Michal Luscon") );
+      
+      
   KCmdLineArgs::init( argc, argv, &aboutData );
+
+  
   KApplication app;
+  
+  
+  gst_init(&argc, &argv); 
  
   KUI_project *mainwindow= new KUI_project;
   

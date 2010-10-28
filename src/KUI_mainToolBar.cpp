@@ -15,6 +15,7 @@
  ****************************************************************************************/
 
 #include "KUI_mainToolBar.h"
+#include "KUI_record.h"
 
 #include <KAction>
 #include <KLocale>
@@ -203,9 +204,6 @@ void mainToolBar::recordSlot()
 {
   trayIcon->show();
   this->parentWidget()->setVisible(false);
-  
-  
-
 }
 
 void mainToolBar::stopSlot()

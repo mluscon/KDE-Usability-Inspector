@@ -14,42 +14,9 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
 ****************************************************************************************/
 
-#ifndef KUI_PROJECT_H
-#define KUI_PROJECT_H
-
-#include <KMainWindow>
-#include <KActionCollection>
-#include <KUrl>
-
-#include "KUI_KuiCentralWidget.h"
+#include <gst/gst.h>
 
 
-class KUI_project : public KMainWindow
-{
-  Q_OBJECT
-  
-  public:
-    KUI_project(QWidget *parent=0);
-    
-  private:
-    void setupMenuFile();
-    void setupMenuWindow();
-    void setupMenuSettings();
-    KMenuBar *menuBar; 
-    KActionCollection *collection;
-    KuiCentralWidget *defaultCentral;
-    KUrl *standartUrl;
-    
-    
-  private slots:
-
-    void saveFileSlot();
-    void openFileSlot();
-    void saveAsFileSlot();
-    
-
-};
-    
-    
-    
-#endif
+int recordKUI(int startX, int startY, int endX, int endY ) {
+  return 0;
+}

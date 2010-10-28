@@ -17,10 +17,12 @@
 #ifndef KUI_KUICENTRALWIDGET_H
 #define KUI_KUICENTRALWIDGET_H
 
+#include "KUI_cameraWidget.h"
 #include "KUI_screenShotLabel.h"
 
+
 #include <QWidget>
-#include <Phonon/VideoWidget>
+
 
 class KuiCentralWidget : public QWidget
 {
@@ -28,23 +30,14 @@ class KuiCentralWidget : public QWidget
   
   public:
     KuiCentralWidget(QWidget *parent);
-  
+ 
   private:
+    cameraWidget *camera;
     screenShotLabel *screen;
-    Phonon::VideoWidget *vwidget;
     
   public slots:
-    void desktop(bool);
-    void camera(bool);
+    void screenVis();
+    void cameraVis();
 };
-
-
-
-
-
-
-
-
-
 
 #endif

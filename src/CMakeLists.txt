@@ -10,13 +10,20 @@ include_directories( ${GSTREAMER_INCLUDE_DIR})
 add_definitions(${GSTREAMER_DEFINITIONS})
 
 
-set(KUI_project_SRCS main.cpp KUI_project.cpp KUI_mainToolBar.cpp KUI_screenShotLabel.cpp KUI_KuiCentralWidget.cpp)
+set( KUI_project_SRCS main.cpp 
+		     KUI_project.cpp
+		     KUI_mainToolBar.cpp
+		     KUI_screenShotLabel.cpp
+		     KUI_KuiCentralWidget.cpp
+		     KUI_cameraWidget.cpp
+		     KUI_record.cpp )
 
 kde4_add_executable(KUI_project ${KUI_project_SRCS})
-target_link_libraries(KUI_project ${KDE4_KDEUI_LIBS} ${GSTREAMER_LIBRARIES} ${KDE4_PHONON_LIBRARY} X11)
 
-#include(FindGStreamer.cmake) 
-#include_directories( ${GSTREAMER_INCLUDE_DIR}) 
-#add_definitions(${GSTREAMER_DEFINITIONS}) 
-#target_link_libraries(KUI_project ${GSTREAMER_LIBRARIES})
-#target_link_libraries(KUI_project ${GSTREAMER_LIBRARIES} ${GSTREAMER_INTERFACE_LIBRARY})
+target_link_libraries(KUI_project ${KDE4_KDEUI_LIBS} 
+				  ${GSTREAMER_LIBRARIES} 
+				  ${GSTREAMER_INTERFACE_LIBRARY}
+				  ${KDE4_PHONON_LIBRARY}
+				  X11 
+				  gobject-2.0  )
+

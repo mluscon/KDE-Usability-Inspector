@@ -27,14 +27,16 @@
 #include <KApplication>
 #include <KAboutApplicationDialog>
 #include <QPushButton>
-
-
+#include <KFileDialog>
+#include <KUrl>
+#include <QFileDialog>
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
   this->resize(400,300);
   KSystemTrayIcon *trayIcon = new KSystemTrayIcon("media-playback-stop",0);
   trayIcon->setVisible(false);
+  
   
   collection = new KActionCollection(this);
   defaultCentral = new KuiCentralWidget(this);
@@ -53,9 +55,7 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   
   
   this->setCentralWidget(defaultCentral);
-  
-  
-  
+    
   mainToolBar *playBar = new mainToolBar(this);
   playBar->setAccessibleDescription("pica Bar");
   this->addToolBar(Qt::BottomToolBarArea, playBar);
@@ -66,13 +66,13 @@ void KUI_project::setupMenuFile()
   
   KMenu *fileMenu = new KMenu(i18n("&File"),this);
    
-  KAction *action = KStandardAction::open(this, SLOT(openFileSlot), collection);
+  KAction *action = KStandardAction::open(this, SLOT(openFileSlot()), collection);
   fileMenu->addAction(collection->addAction("open_file", action));
   
-  action = KStandardAction::save(this, SLOT(saveFileSlot), collection);
+  action = KStandardAction::save(this, SLOT(saveFileSlot()), collection);
   fileMenu->addAction(collection->addAction("save_file", action)); 
   
-  action = KStandardAction::saveAs(this, SLOT(saveAsFileSlot), collection);
+  action = KStandardAction::saveAs(this, SLOT(saveAsFileSlot()), collection);
   fileMenu->addAction(collection->addAction("save_as_file", action));
   
   fileMenu->addSeparator();
@@ -90,14 +90,14 @@ void KUI_project::setupMenuWindow()
   KAction *showDesktop = new KAction(i18n("Show &Desktop"),this);
   showDesktop->setCheckable(true);
   showDesktop->setChecked(true);
-  connect(showDesktop, SIGNAL(triggered(bool)), defaultCentral, SLOT(desktop(showDesktop->isChecked())));
+  connect(showDesktop, SIGNAL(triggered(bool)), defaultCentral, SLOT(screenVis()));
   windowMenu->addAction(showDesktop);
   
   KAction *showCamera = new KAction(i18n("Show &Camera"),this);
   showCamera->setCheckable(true);
   showCamera->setChecked(true);
   windowMenu->addAction(showCamera);
-  connect(showCamera, SIGNAL(triggered(bool)), defaultCentral, SLOT(camera(showCamera->isChecked())));
+  connect(showCamera, SIGNAL(triggered(bool)), defaultCentral, SLOT(cameraVis()));
   menuBar->addMenu(windowMenu);
 }
 
@@ -121,7 +121,10 @@ void KUI_project::saveFileSlot()
 
 void KUI_project::openFileSlot()
 {
-
+  //QFileDialog *moj = new QFileDialog;
+  //moj->show();
+  
+  
 }
 
 void KUI_project::saveAsFileSlot()

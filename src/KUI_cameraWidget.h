@@ -13,43 +13,29 @@
  *  You should have received a copy of the GNU General Public License along with        *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
 ****************************************************************************************/
+#ifndef KUI_CAMERAWIDGET_H
+#define KUI_CAMERAWIDGET_H
 
-#ifndef KUI_PROJECT_H
-#define KUI_PROJECT_H
+#include <QWidget>
+#include <gst/gst.h>
 
-#include <KMainWindow>
-#include <KActionCollection>
-#include <KUrl>
-
-#include "KUI_KuiCentralWidget.h"
-
-
-class KUI_project : public KMainWindow
+class cameraWidget : public QWidget 
 {
   Q_OBJECT
   
   public:
-    KUI_project(QWidget *parent=0);
-    
+    cameraWidget(QWidget *parent);
+    virtual ~cameraWidget();
+ 
   private:
-    void setupMenuFile();
-    void setupMenuWindow();
-    void setupMenuSettings();
-    KMenuBar *menuBar; 
-    KActionCollection *collection;
-    KuiCentralWidget *defaultCentral;
-    KUrl *standartUrl;
+    void showEvent(QShowEvent *event);
+    void hideEvent(QHideEvent *event);
+    GstElement *cameraPipeline;
+    GstElement *sink;
     
-    
-  private slots:
-
-    void saveFileSlot();
-    void openFileSlot();
-    void saveAsFileSlot();
-    
-
+  public:
+    void stopPipeline();
+   
 };
-    
-    
-    
+
 #endif
