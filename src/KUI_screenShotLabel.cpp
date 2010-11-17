@@ -21,7 +21,8 @@
 #include <QDesktopWidget>
 #include <QTimer>
 #include <QPainter>
-#include <X11/Xlib.h>
+#include <X11/Xlib.h>  
+
 
 screenShotLabel::screenShotLabel(QWidget* parent): QLabel(parent)
 {
@@ -30,8 +31,6 @@ screenShotLabel::screenShotLabel(QWidget* parent): QLabel(parent)
   timer = new QTimer(this);
   timer->start(1000);
   connect(timer, SIGNAL(timeout()), this, SLOT(pictureUpdate()));
-  
-  pictureUpdate();
 }
 
 void screenShotLabel::resizeEvent(QResizeEvent* event)
@@ -44,11 +43,11 @@ void screenShotLabel::resizeEvent(QResizeEvent* event)
 
 void screenShotLabel::pictureUpdate()
 {
-  screenPixmap = QPixmap::grabWindow(QApplication::desktop()->winId());
+  QPixmap grabedPixmap = QPixmap::grabWindow(QApplication::desktop()->winId());
   
-  QPixmap showedPixmap;
-  showedPixmap = screenPixmap.scaled(this->width()-5,this->height()-5, Qt::KeepAspectRatio, Qt::SmoothTransformation); 
-  this->setPixmap(showedPixmap);
+
+  screenPixmap = grabedPixmap.scaled(this->width()-5,this->height()-5, Qt::KeepAspectRatio, Qt::SmoothTransformation); 
+  this->setPixmap(screenPixmap);
   
 }
 

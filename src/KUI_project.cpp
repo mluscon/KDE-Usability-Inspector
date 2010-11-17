@@ -33,11 +33,9 @@
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
-  this->resize(400,300);
-  KSystemTrayIcon *trayIcon = new KSystemTrayIcon("media-playback-stop",0);
-  trayIcon->setVisible(false);
   
-  
+  this->resize(600,350);
+    
   collection = new KActionCollection(this);
   defaultCentral = new KuiCentralWidget(this);
   
@@ -48,18 +46,22 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   menuBar->addMenu(helpMenu());
   this->setMenuBar(menuBar);
   
-  KToolBar *tools = new KToolBar(i18n("&Tools"),this);
+  KToolBar *tools = new KToolBar(i18n("&Tools"), this);
   tools->addAction(collection->action("open_file"));
   tools->addAction(collection->action("save_file"));
   tools->setToolButtonStyle(Qt::ToolButtonIconOnly);
   
   
   this->setCentralWidget(defaultCentral);
-    
+  
   mainToolBar *playBar = new mainToolBar(this);
   playBar->setAccessibleDescription("pica Bar");
+  
   this->addToolBar(Qt::BottomToolBarArea, playBar);
+  
 }
+
+
 
 void KUI_project::setupMenuFile()
 {
@@ -134,5 +136,4 @@ void KUI_project::saveAsFileSlot()
 
 
 
-  
   

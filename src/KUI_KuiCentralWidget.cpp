@@ -28,6 +28,7 @@ KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
   
   camera = new cameraWidget(this);
   screen = new screenShotLabel(this);
+  
    
   centralLayout->addWidget(screen,0,0);
   centralLayout->addWidget(camera,0,1);

@@ -16,7 +16,97 @@
 
 #include <gst/gst.h>
 
+#include "KUI_record.h"
 
-int recordKUI(int startX, int startY, int endX, int endY ) {
-  return 0;
+
+KUIRecord::KUIRecord(QString format, struct rect recArea, char* location)
+{ 
+  
+  GstElement *camSource, *camQueue1, *camColor, *camRate, *camMux, *camQueue2, *camSink;
+
+  camSource = gst_element_factory_make ("v4l2src", "camSource");
+  camColor = gst_element_factory_make ("ffmpegcolorspace", "camColorpsace");
+  camRate = gst_element_factory_make("videorate", "camRate");
+  camSink = gst_element_factory_make ("filesink", "camSink");
+  camQueue1 = gst_element_factory_make("multiqueue", "queue1");
+  camQueue2 = gst_element_factory_make("multiqueue", "queue2");
+  
+  if ( format==QString("avi") ) {
+    camEnc = gst_element_factory_make ("xvidenc", "camEnc");
+    camMux = gst_element_factory_make ("avimux", "camMux");
+  } else {
+    camEnc = gst_element_factory_make ("thoraenc", "camEnc");
+    camMux = gst_element_factory_make ("oggmux", "camMux");
+  }
+  
+  GstElement *screenSource, *screenRate, *screenColor, *screenMux, *screenSink; 
+  
+  screenSource = gst_element_factory_make("ximagesrc", "screenSource");
+  screenRate = gst_element_factory_make("videorate", "screenRate");
+  screenColor = gst_element_factory_make("ffmpegcolorspace", "screenColor");
+  screenSink = gst_element_factory_make("filesink", "screenSink");
+  
+  if ( format==QString("avi") ) {
+    screenEnc = gst_element_factory_make("xvidenc", "screenEnc");
+    screenMux = gst_element_factory_make("avimux", "screenMux");
+  } else {
+    screenEnc = gst_element_factory_make("theoraenc", "screenEnc");
+    screenMux = gst_element_factory_make("oggmux", "screenMux");
+  }
+
+  pipeline = gst_pipeline_new ("recorder");
+  
+  /*g_object_set (G_OBJECT (screenSource), "use-damage", true , NULL);
+  g_object_set (G_OBJECT (screenSource), "startx", recArea.startx , NULL);
+  g_object_set (G_OBJECT (screenSource), "starty", recArea.starty , NULL);
+  g_object_set (G_OBJECT (screenSource), "endx", recArea.endx , NULL);
+  g_object_set (G_OBJECT (screenSource), "endy", recArea.endy , NULL);*/
+  g_object_set (G_OBJECT (camSink), "location", "/home/michal/camera.avi",  NULL);
+  g_object_set (G_OBJECT (screenSink), "location", "/home/michal/screen.avi",  NULL);
+  
+  GstCaps *caps;
+
+  caps = gst_caps_new_simple ("video/x-raw-rgb",
+			      "framerate", GST_TYPE_FRACTION, 20, 1,
+			      // "width", G_TYPE_INT , 200,
+	  	              // "height", G_TYPE_INT, 200,
+	  	             // "pixel-aspect-ratio", GST_TYPE_FRACTION, 1 , 1,
+		             NULL);
+  
+  gst_bin_add_many (GST_BIN (pipeline),
+			     screenSource,
+			     screenRate,
+			     screenColor,
+			     screenEnc,
+			     screenMux,
+			     screenSink,
+			     camSource,
+			     camColor,
+			     camQueue1,
+			     camRate,
+			     camEnc,
+			     camMux,
+			     camQueue2,
+			     camSink,
+			     NULL);
+  
+  gst_element_link_filtered (screenSource, screenColor, caps);
+  gst_element_link_many (screenColor, camQueue1, screenRate, screenEnc, screenMux, screenSink, NULL);
+  gst_element_link_many (camSource, camQueue1, camColor, camRate, camEnc, camMux, camSink, NULL);
+  
+  
+  
+  gst_element_set_state (pipeline, GST_STATE_PLAYING);
+
+ 
+}
+
+KUIRecord::~KUIRecord()
+{
+  gst_element_send_event (screenEnc, gst_event_new_eos ());
+  gst_element_send_event (camEnc, gst_event_new_eos ());
+  gst_element_send_event(pipeline, gst_event_new_flush_stop());
+  gst_element_set_state(pipeline, GST_STATE_NULL);
+  gst_object_unref(pipeline);
+  
 }

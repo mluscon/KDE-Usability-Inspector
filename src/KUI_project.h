@@ -20,6 +20,7 @@
 #include <KMainWindow>
 #include <KActionCollection>
 #include <KUrl>
+#include <KSystemTrayIcon>
 
 #include "KUI_KuiCentralWidget.h"
 
@@ -39,8 +40,7 @@ class KUI_project : public KMainWindow
     KActionCollection *collection;
     KuiCentralWidget *defaultCentral;
     KUrl *standartUrl;
-    
-    
+       
   private slots:
 
     void saveFileSlot();

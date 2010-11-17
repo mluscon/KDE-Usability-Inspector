@@ -19,9 +19,12 @@
 #include <gst/interfaces/xoverlay.h>
 #include <QApplication>
 #include <iostream>
+#include <KMessageBox>
+#include <KLocale>
 
 cameraWidget::cameraWidget(QWidget* parent): QWidget(parent)
 {  
+  cameraOK=true;
   this->setAttribute(Qt::WA_NativeWindow);
   
   GstElement *source, *color;
@@ -31,43 +34,70 @@ cameraWidget::cameraWidget(QWidget* parent): QWidget(parent)
   color = gst_element_factory_make ("ffmpegcolorspace", "color");
   sink = gst_element_factory_make ("xvimagesink", "sink");
 
-  gst_bin_add_many (GST_BIN (cameraPipeline), source, color, sink, NULL);
   
-  GstCaps *caps;
-  caps = gst_caps_new_simple ("video/x-raw-rgb",
-    "framerate", GST_TYPE_FRACTION, 10, 1,
-    //"width", G_TYPE_INT , 200,
-    //"height", G_TYPE_INT, 200,
-    "pixel-aspect-ratio", GST_TYPE_FRACTION, 1 , 1,
-  NULL);
-
-  gst_element_link_filtered (source, color, caps);
-  gst_element_link_many (color, sink, NULL);
+  if ( !cameraPipeline || !source || !color || !sink ) {
+    if (cameraPipeline) { gst_object_unref(GST_OBJECT (cameraPipeline)); }
+    if (source) { gst_object_unref(GST_OBJECT (source)); }
+    if (color) { gst_object_unref(GST_OBJECT (color)); }
+    if (sink) { gst_object_unref(GST_OBJECT (sink)); }
+    cameraOK=false;
+  }
+  
+  if (cameraOK) {
+    gst_bin_add_many (GST_BIN (cameraPipeline), source, color, sink, NULL);
+    
+    GstCaps *caps;
+    caps = gst_caps_new_simple ("video/x-raw-rgb",
+      "framerate", GST_TYPE_FRACTION, 10, 1,
+      //"width", G_TYPE_INT , 200,
+      //"height", G_TYPE_INT, 200,
+      "pixel-aspect-ratio", GST_TYPE_FRACTION, 1 , 1,
+      NULL);
+    
+    gst_element_link_filtered (source, color, caps);
+    gst_element_link_many (color, sink, NULL);
+  } else {
+    
+  }
+  
+  
 }
 
 cameraWidget::~cameraWidget()
 {
  
-  gst_element_send_event (cameraPipeline, gst_event_new_eos ());
-  gst_element_set_state(cameraPipeline, GST_STATE_NULL);
-  if (cameraPipeline!=NULL) { gst_object_unref(cameraPipeline); }
+  if (cameraOK) { 
+    gst_element_send_event (cameraPipeline, gst_event_new_eos ());
+    gst_element_set_state(cameraPipeline, GST_STATE_NULL);
+    gst_object_unref(cameraPipeline);
+  }
+
 }
 
 void cameraWidget::showEvent(QShowEvent* event)
 {
   QWidget::showEvent(event);
   
-  QApplication::syncX();
-  gst_element_set_state(sink, GST_STATE_READY);
-  gst_element_set_state (cameraPipeline, GST_STATE_PLAYING);
-  gst_x_overlay_prepare_xwindow_id(GST_X_OVERLAY(sink));
-  gst_x_overlay_set_xwindow_id(GST_X_OVERLAY(sink),this->winId());
+  if (cameraOK) { 
+    QApplication::syncX();
+    gst_element_set_state(sink, GST_STATE_READY);
+    gst_element_set_state (cameraPipeline, GST_STATE_PLAYING);
+    gst_x_overlay_prepare_xwindow_id(GST_X_OVERLAY(sink));
+    gst_x_overlay_set_xwindow_id(GST_X_OVERLAY(sink),this->winId());
+  } 
 }
 
 void cameraWidget::hideEvent(QHideEvent* event)
 {
-  gst_element_send_event (cameraPipeline, gst_event_new_eos ());
-  gst_element_set_state(cameraPipeline, GST_STATE_NULL);
+  QWidget::hideEvent(event);
+  if (cameraOK) {
+    gst_element_send_event (cameraPipeline, gst_event_new_eos ());
+    gst_element_set_state(cameraPipeline, GST_STATE_NULL);
+  }
 }
 
+void cameraWidget::showError(QString error)
+{
+  KMessageBox::messageBox(this, (KMessageBox::DialogType)8, error);
+}
 

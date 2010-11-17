@@ -14,4 +14,23 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
 ****************************************************************************************/
 
-int recordKUI(int startX, int startY, int endX, int endY );
+#include <gst/gst.h>
+#include <QString>
+
+struct rect {
+  int startx;
+  int starty;
+  int endx;
+  int endy;
+};
+
+class KUIRecord {
+  private:
+    GstElement *pipeline;
+    GstElement *screenEnc;
+    GstElement *camEnc;
+    
+  public:
+    KUIRecord(QString, struct rect, char*);
+    ~KUIRecord();
+};

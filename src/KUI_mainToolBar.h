@@ -22,7 +22,11 @@
 #include <QSlider>
 #include <KSystemTrayIcon>
 
+#include "KUI_record.h"
+
 enum Mode { defaultMode, playingMode, pauseMode, stopMode };
+
+
 
 class mainToolBar : public KToolBar
 {
@@ -32,15 +36,12 @@ class mainToolBar : public KToolBar
     mainToolBar(QWidget *parent);
   
   private:
-    int startx;
-    int starty;
-    int endx;
-    int endy;
+    struct rect area;
     KActionCollection *toolBarCollection;
     QSlider *timeSlider;
     void updateInterface(Mode );
     KSystemTrayIcon *trayIcon;
-    
+    KUIRecord *rec;
   public slots:
     void aimSlot();
     void playSlot();

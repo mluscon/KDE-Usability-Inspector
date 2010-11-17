@@ -15,7 +15,7 @@
  ****************************************************************************************/
 
 #include "KUI_mainToolBar.h"
-#include "KUI_record.h"
+
 
 #include <KAction>
 #include <KLocale>
@@ -32,9 +32,9 @@
 
 mainToolBar::mainToolBar(QWidget* parent): KToolBar(parent)
 {
-  startx = starty = endx = endy = 0;
+  area.startx = area.starty = area.endx = area.endy = 0;
   
-  trayIcon = new KSystemTrayIcon("media-playback-stop",0);
+  trayIcon = new KSystemTrayIcon("media-playback-stop",this);
   connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(unhideSlot()));
   
   this->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -182,11 +182,12 @@ void mainToolBar::aimSlot()
   XWindowAttributes selWin;
   XGetWindowAttributes(dpy, target_win, &selWin);
  
-  startx = selWin.x;
-  starty = selWin.y;
-  endx = selWin.x + selWin.width;
-  endy = selWin.y + selWin.height;
+  area.startx = selWin.x;
+  area.starty = selWin.y;
+  area.endx = selWin.x + selWin.width;
+  area.endy = selWin.y + selWin.height;
   
+  XCloseDisplay(dpy);
 }
 
 
@@ -204,11 +205,12 @@ void mainToolBar::recordSlot()
 {
   trayIcon->show();
   this->parentWidget()->setVisible(false);
+  rec = new KUIRecord(QString("avi"), area, "/home/michal/"); 
 }
 
 void mainToolBar::stopSlot()
 {
-
+ 
 }
 
 void mainToolBar::lockSlot()
@@ -218,6 +220,7 @@ void mainToolBar::lockSlot()
 
 void mainToolBar::unhideSlot()
 {
+  delete rec;
   this->parentWidget()->setVisible(true);
   trayIcon->setVisible(false);
 }

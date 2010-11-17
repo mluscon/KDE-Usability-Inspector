@@ -28,14 +28,12 @@ class cameraWidget : public QWidget
     virtual ~cameraWidget();
  
   private:
+    bool cameraOK;
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
+    void showError(QString error);
     GstElement *cameraPipeline;
     GstElement *sink;
-    
-  public:
-    void stopPipeline();
-   
 };
 
 #endif

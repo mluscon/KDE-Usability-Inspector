@@ -18,10 +18,11 @@
 #include <KAboutData>
 #include <KCmdLineArgs>
 #include <gst/gst.h>
+#include <gst/controller/gstcontroller.h>
 
 #include "KUI_mainToolBar.h"
 #include "KUI_project.h"
- 
+
 int main (int argc, char *argv[])
 {
   
@@ -33,17 +34,14 @@ int main (int argc, char *argv[])
       
       
   KCmdLineArgs::init( argc, argv, &aboutData );
-
   
   KApplication app;
   
-  
-  gst_init(&argc, &argv); 
- 
-  KUI_project *mainwindow= new KUI_project;
-  
-  mainwindow->show();
-  
+  gst_init(&argc, &argv);
+  gst_controller_init (&argc, &argv);
+
+  KUI_project *mainWindow= new KUI_project;
+  mainWindow->show();
   return app.exec();
   
 }
