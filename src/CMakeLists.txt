@@ -11,12 +11,13 @@ add_definitions(${GSTREAMER_DEFINITIONS})
 
 
 set( KUI_project_SRCS main.cpp 
-		      KUI_project.cpp
-		      KUI_mainToolBar.cpp
-		      KUI_screenShotLabel.cpp
-		      KUI_KuiCentralWidget.cpp
-		      KUI_cameraWidget.cpp
-		      KUI_record.cpp )
+                      KUI_project.cpp
+                      KUI_MainToolBar.cpp
+                      KUI_screenShotLabel.cpp
+                      KUI_KuiCentralWidget.cpp
+                      KUI_CameraWidget.cpp
+                      KUI_NewProject.cpp
+                      KUI_record.cpp )
 
 kde4_add_executable(KUI_project ${KUI_project_SRCS})
 

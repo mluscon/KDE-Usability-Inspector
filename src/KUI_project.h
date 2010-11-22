@@ -17,13 +17,14 @@
 #ifndef KUI_PROJECT_H
 #define KUI_PROJECT_H
 
-#include <KMainWindow>
-#include <KActionCollection>
-#include <KUrl>
-#include <KSystemTrayIcon>
-
 #include "KUI_KuiCentralWidget.h"
 
+#include <KMainWindow>
+
+class KActionCollection;
+class KUrl;
+class KSystemTrayIcon;
+class KConfig;
 
 class KUI_project : public KMainWindow
 {
@@ -33,6 +34,7 @@ class KUI_project : public KMainWindow
     KUI_project(QWidget *parent=0);
     
   private:
+    void setupConfig();
     void setupMenuFile();
     void setupMenuWindow();
     void setupMenuSettings();
@@ -40,14 +42,14 @@ class KUI_project : public KMainWindow
     KActionCollection *collection;
     KuiCentralWidget *defaultCentral;
     KUrl *standartUrl;
+    KConfig *config;
        
   private slots:
-
+    void newFileSlot();
     void saveFileSlot();
     void openFileSlot();
     void saveAsFileSlot();
-    
-
+    void preferencesSlot();
 };
     
     

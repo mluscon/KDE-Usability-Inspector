@@ -15,8 +15,8 @@
 ****************************************************************************************/
 
 #include "KUI_project.h"
-#include "KUI_mainToolBar.h"
-
+#include "KUI_MainToolBar.h"
+#include "KUI_NewProject.h"
 
 #include <KAction>
 #include <KLocale>
@@ -30,11 +30,14 @@
 #include <KFileDialog>
 #include <KUrl>
 #include <QFileDialog>
+#include <KConfig>
+#include <KConfigDialog>
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
+  setupConfig();
   
-  this->resize(600,350);
+  this->resize(500,300);
     
   collection = new KActionCollection(this);
   defaultCentral = new KuiCentralWidget(this);
@@ -47,6 +50,7 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   this->setMenuBar(menuBar);
   
   KToolBar *tools = new KToolBar(i18n("&Tools"), this);
+  tools->addAction(collection->action("new_file"));
   tools->addAction(collection->action("open_file"));
   tools->addAction(collection->action("save_file"));
   tools->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -54,7 +58,7 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   
   this->setCentralWidget(defaultCentral);
   
-  mainToolBar *playBar = new mainToolBar(this);
+  MainToolBar *playBar = new MainToolBar(this);
   playBar->setAccessibleDescription("pica Bar");
   
   this->addToolBar(Qt::BottomToolBarArea, playBar);
@@ -68,7 +72,12 @@ void KUI_project::setupMenuFile()
   
   KMenu *fileMenu = new KMenu(i18n("&File"),this);
    
-  KAction *action = KStandardAction::open(this, SLOT(openFileSlot()), collection);
+  KAction *action = KStandardAction::openNew(this, SLOT(newFileSlot()), collection);
+  fileMenu->addAction(collection->addAction("new_file", action));
+  
+  fileMenu->addSeparator();
+  
+  action = KStandardAction::open(this, SLOT(openFileSlot()), collection);
   fileMenu->addAction(collection->addAction("open_file", action));
   
   action = KStandardAction::save(this, SLOT(saveFileSlot()), collection);
@@ -113,8 +122,32 @@ void KUI_project::setupMenuSettings()
   
   KAction *action = KStandardAction::configureToolbars(this, SLOT(), collection);
   settingsMenu->addAction(collection->addAction("configure_toolbars", action));
+  
+  action = KStandardAction::preferences(this, SLOT(), collection);
+  settingsMenu->addAction(collection->addAction("configure_kui", action));
 }
 
+void KUI_project::preferencesSlot()
+{
+  //KConfigDialog *conf = new KConfigDialog(this, "KUI preferences", 
+
+
+}
+
+
+void KUI_project::setupConfig()
+{
+  KConfig newconf("KUI_project");
+}
+
+
+void KUI_project::newFileSlot()
+{
+  NewProject *openNew = new NewProject(this);
+  
+  openNew->setModal(true);
+  openNew->show();
+}
 
 void KUI_project::saveFileSlot()
 {

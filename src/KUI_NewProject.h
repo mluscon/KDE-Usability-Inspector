@@ -10,51 +10,55 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
  *                                                                                      *
- *  You should have received a copy of the GNU General Public License along with        *
+ * You should have received a copy of the GNU General Public License along with         *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
-****************************************************************************************/
+ ****************************************************************************************/
 
-#include "KUI_KuiCentralWidget.h"
+#ifndef KUI_NEWPROJECT_H
+#define KUI_NEWPROJECT_H
+
+#include <KDialog>
+#include <QList> 
 
 
-#include <QGridLayout>
+class QGridLayout;
+class QVBoxLayout;
+class QString;
 
-#include <QApplication>
-
-
-KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
-{
-  QGridLayout *centralLayout = new QGridLayout(this);
+class User : public QObject {
+  Q_OBJECT
   
-  camera = new CameraWidget(this);
-  screen = new screenShotLabel(this);
+  private:
+    QString name;
+    int age;
+    
+  public:
+    User() { name="user"; age=1; };
+    QGridLayout *myGrid;
+    
+  public slots:
+    void changeName(QString newName) { name=newName; };
+    void changeAge(int newAge) { age=newAge; };
+};
+
+
+class NewProject : public KDialog {
+  Q_OBJECT
   
-   
-  centralLayout->addWidget(screen,0,0);
-  centralLayout->addWidget(camera,0,1);
-  this->setLayout(centralLayout);
-}
+  public:
+    NewProject(QWidget* parent);
+  
+  private:
+    QList<User*> users;
+    int actualUsersCount;
+    QVBoxLayout *sessionLayout;
+    void adduser();
+    void deleteUser(User*);
+  
+  private slots:
+    void changeFolderSlot();
+    void usersCountChangedSlot(int);
+ 
+};
 
-
-void KuiCentralWidget::cameraVis()
-{
-  if (camera->isHidden()) {
-    camera->show();
-  } else {
-    camera->hide();
-  }
-
-}
-
-void KuiCentralWidget::screenVis()
-{
-  if (screen->isHidden()) {
-    screen->show();
-  } else {
-    screen->hide();
-  }
-
-}
-
-
-
+#endif

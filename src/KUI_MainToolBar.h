@@ -14,47 +14,44 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
 ****************************************************************************************/
 
-#include "KUI_KuiCentralWidget.h"
+#ifndef KUI_MAINTOOLBAR_H
+#define KUI_MAINTOOLBAR_H
 
+#include "KUI_record.h"
 
-#include <QGridLayout>
+#include <KToolBar>
 
-#include <QApplication>
+class KActionCollection;
+class QSlider;
+class KSystemTrayIcon;
 
+enum Mode { defaultMode, playingMode, pauseMode, stopMode };
 
-KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
+class MainToolBar : public KToolBar
 {
-  QGridLayout *centralLayout = new QGridLayout(this);
+  Q_OBJECT
   
-  camera = new CameraWidget(this);
-  screen = new screenShotLabel(this);
+  public:
+    MainToolBar(QWidget *parent);
   
-   
-  centralLayout->addWidget(screen,0,0);
-  centralLayout->addWidget(camera,0,1);
-  this->setLayout(centralLayout);
-}
-
-
-void KuiCentralWidget::cameraVis()
-{
-  if (camera->isHidden()) {
-    camera->show();
-  } else {
-    camera->hide();
-  }
-
-}
-
-void KuiCentralWidget::screenVis()
-{
-  if (screen->isHidden()) {
-    screen->show();
-  } else {
-    screen->hide();
-  }
-
-}
+  private:
+    struct rect area;
+    KActionCollection *toolBarCollection;
+    QSlider *timeSlider;
+    void updateInterface(Mode );
+    KSystemTrayIcon *trayIcon;
+    KUIRecord *rec;
+    
+  public slots:
+    void aimSlot();
+    void playSlot();
+    void recordSlot();
+    void pauseSlot();
+    void stopSlot();
+    void lockSlot();
+    void unhideSlot();
+};
 
 
 
+#endif

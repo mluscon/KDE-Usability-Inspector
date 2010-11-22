@@ -15,6 +15,8 @@
 ****************************************************************************************/
 
 #include <gst/gst.h>
+#include <iostream>
+#include <QString>
 
 #include "KUI_record.h"
 
@@ -56,11 +58,16 @@ KUIRecord::KUIRecord(QString format, struct rect recArea, char* location)
 
   pipeline = gst_pipeline_new ("recorder");
   
-  /*g_object_set (G_OBJECT (screenSource), "use-damage", true , NULL);
+  std::cout << recArea.startx << " : ";
+  std::cout << recArea.starty << std::endl;
+  std::cout << recArea.endx << " : ";
+  std::cout << recArea.endy << std::endl;
+  
+  //g_object_set (G_OBJECT (screenSource), "use-damage", true , NULL);
   g_object_set (G_OBJECT (screenSource), "startx", recArea.startx , NULL);
   g_object_set (G_OBJECT (screenSource), "starty", recArea.starty , NULL);
   g_object_set (G_OBJECT (screenSource), "endx", recArea.endx , NULL);
-  g_object_set (G_OBJECT (screenSource), "endy", recArea.endy , NULL);*/
+  g_object_set (G_OBJECT (screenSource), "endy", recArea.endy , NULL);
   g_object_set (G_OBJECT (camSink), "location", "/home/michal/camera.avi",  NULL);
   g_object_set (G_OBJECT (screenSink), "location", "/home/michal/screen.avi",  NULL);
   
@@ -91,10 +98,8 @@ KUIRecord::KUIRecord(QString format, struct rect recArea, char* location)
 			     NULL);
   
   gst_element_link_filtered (screenSource, screenColor, caps);
-  gst_element_link_many (screenColor, camQueue1, screenRate, screenEnc, screenMux, screenSink, NULL);
+  gst_element_link_many (screenColor, camQueue1, screenEnc, screenMux, screenSink, NULL);
   gst_element_link_many (camSource, camQueue1, camColor, camRate, camEnc, camMux, camSink, NULL);
-  
-  
   
   gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
@@ -107,6 +112,5 @@ KUIRecord::~KUIRecord()
   gst_element_send_event (camEnc, gst_event_new_eos ());
   gst_element_send_event(pipeline, gst_event_new_flush_stop());
   gst_element_set_state(pipeline, GST_STATE_NULL);
-  gst_object_unref(pipeline);
-  
+  gst_object_unref(pipeline);  
 }

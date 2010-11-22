@@ -15,7 +15,8 @@
 ****************************************************************************************/
 
 #include <gst/gst.h>
-#include <QString>
+
+class QString;
 
 struct rect {
   int startx;
@@ -23,6 +24,8 @@ struct rect {
   int endx;
   int endy;
 };
+
+
 
 class KUIRecord {
   private:

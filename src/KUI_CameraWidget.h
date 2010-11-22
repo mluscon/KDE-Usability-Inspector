@@ -13,48 +13,27 @@
  *  You should have received a copy of the GNU General Public License along with        *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
 ****************************************************************************************/
+#ifndef KUI_CAMERAWIDGET_H
+#define KUI_CAMERAWIDGET_H
 
-#include "KUI_KuiCentralWidget.h"
+#include <QWidget>
+#include <gst/gst.h>
 
-
-#include <QGridLayout>
-
-#include <QApplication>
-
-
-KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
+class CameraWidget : public QWidget 
 {
-  QGridLayout *centralLayout = new QGridLayout(this);
+  Q_OBJECT
   
-  camera = new CameraWidget(this);
-  screen = new screenShotLabel(this);
-  
-   
-  centralLayout->addWidget(screen,0,0);
-  centralLayout->addWidget(camera,0,1);
-  this->setLayout(centralLayout);
-}
+  public:
+    CameraWidget(QWidget *parent);
+    virtual ~CameraWidget();
+ 
+  private:
+    bool cameraOK;
+    void showEvent(QShowEvent *event);
+    void hideEvent(QHideEvent *event);
+    void showError(QString error);
+    GstElement *cameraPipeline;
+    GstElement *sink;
+};
 
-
-void KuiCentralWidget::cameraVis()
-{
-  if (camera->isHidden()) {
-    camera->show();
-  } else {
-    camera->hide();
-  }
-
-}
-
-void KuiCentralWidget::screenVis()
-{
-  if (screen->isHidden()) {
-    screen->show();
-  } else {
-    screen->hide();
-  }
-
-}
-
-
-
+#endif

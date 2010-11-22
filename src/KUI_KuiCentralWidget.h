@@ -17,9 +17,8 @@
 #ifndef KUI_KUICENTRALWIDGET_H
 #define KUI_KUICENTRALWIDGET_H
 
-#include "KUI_cameraWidget.h"
+#include "KUI_CameraWidget.h"
 #include "KUI_screenShotLabel.h"
-
 
 #include <QWidget>
 
@@ -32,7 +31,7 @@ class KuiCentralWidget : public QWidget
     KuiCentralWidget(QWidget *parent);
  
   private:
-    cameraWidget *camera;
+    CameraWidget *camera;
     screenShotLabel *screen;
     
   public slots:

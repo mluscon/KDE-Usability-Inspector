@@ -20,7 +20,7 @@
 #include <gst/gst.h>
 #include <gst/controller/gstcontroller.h>
 
-#include "KUI_mainToolBar.h"
+#include "KUI_MainToolBar.h"
 #include "KUI_project.h"
 
 int main (int argc, char *argv[])
@@ -42,6 +42,7 @@ int main (int argc, char *argv[])
 
   KUI_project *mainWindow= new KUI_project;
   mainWindow->show();
+   
   return app.exec();
   
 }
