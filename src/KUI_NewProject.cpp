@@ -27,43 +27,39 @@
 #include <QSpinBox>
 #include <QToolButton>
 #include <QString>
+#include <QToolButton>
 
 NewProject::NewProject(QWidget* parent): KDialog(parent)
 {
   
   this->setCaption(i18n("Session settings"));
   
-  KTabWidget *settings = new KTabWidget(this);
-  this->setMainWidget(settings);
-  
-  QWidget *session = new QWidget(settings);
-  settings->addTab(session, i18n("Session"));
-  
-  sessionLayout = new QVBoxLayout(settings);
+  QWidget *centralWidget = new QWidget(this);
+  QVBoxLayout *centralWidgetLayout = new QVBoxLayout();
   
   QGridLayout *gridLayout = new QGridLayout();
-  sessionLayout->addLayout(gridLayout, Qt::AlignTop);
+  centralWidgetLayout->addLayout(gridLayout, Qt::AlignTop);
+ 
   gridLayout->addWidget(new QLabel(i18n("Session folder:")), 0, 0);
-  
-  KLineEdit *folderLine = new KLineEdit(settings);
+  KLineEdit *folderLine = new KLineEdit();
   gridLayout->addWidget(folderLine, 0, 1);
   
-  QToolButton *folderButton = new QToolButton(settings);
-  folderButton->setIcon(KIcon("document-open-folder"));
-  folderButton->setToolTip(i18n("Select Folder"));
-  connect(folderButton, SIGNAL(clicked()), this, SLOT(changeFolderSlot()));
-  gridLayout->addWidget(folderButton, 0, 2);
-  
   gridLayout->addWidget(new QLabel(i18n("Number of users:")), 1, 0);
-  QSpinBox *numBox = new QSpinBox(settings);
+  numBox = new QSpinBox();
   numBox->setMinimum(1);
-  this->adduser();
+  actualUsersCount=0;
   connect(numBox, SIGNAL(valueChanged(int)), this, SLOT(usersCountChangedSlot(int)));
-  gridLayout->addWidget(numBox);
+  gridLayout->addWidget(numBox, 1, 1);
   
   
+  usersTabsWidget = new KTabWidget(this);
+  centralWidgetLayout->addWidget(usersTabsWidget);
+  usersTabsWidget->setCloseButtonEnabled(true);
+  connect(usersTabsWidget, SIGNAL(closeRequest(QWidget*)), this, SLOT(closeTabSlot(QWidget*)));
+  this->adduser();
   
-  session->setLayout(sessionLayout);
+  centralWidget->setLayout(centralWidgetLayout);
+  this->setMainWidget(centralWidget);
   
 }
 
@@ -72,25 +68,26 @@ void NewProject::adduser()
 {
   User *newUser = new User;
   users.append(newUser);
-
-  QGridLayout *gridLayout = new QGridLayout();
   
-  gridLayout->addWidget(new QLabel(i18n("Name:")), 0, 0);
-  KLineEdit *nameLine = new KLineEdit();
+  newUser->myWidget = new QWidget(this);
+  QGridLayout *gridLayout = new QGridLayout(newUser->myWidget);
+  
+  gridLayout->addWidget(new QLabel(i18n("Name:"), newUser->myWidget), 0, 0);
+  KLineEdit *nameLine = new KLineEdit(newUser->myWidget);
   connect(nameLine, SIGNAL(userTextChanged(QString)), newUser, SLOT(changeName(QString)));
   gridLayout->addWidget(nameLine, 0, 1);
   
-  gridLayout->addWidget(new QLabel(i18n("Age:")), 1, 0);
-  QSpinBox *ageBox = new QSpinBox();
+  gridLayout->addWidget(new QLabel(i18n("Age:"), newUser->myWidget), 1, 0);
+  QSpinBox *ageBox = new QSpinBox(newUser->myWidget);
   ageBox->setMinimum(1);
   ageBox->setMaximum(200);
   connect(ageBox, SIGNAL(valueChanged(int)), newUser, SLOT(changeAge(int)));
   gridLayout->addWidget(ageBox, 1, 1);
   
-  actualUsersCount=1;
-  
-  newUser->myGrid=gridLayout;
-  sessionLayout->addLayout(gridLayout);
+  actualUsersCount++;
+  newUser->myWidget->setLayout(gridLayout);
+    
+  usersTabsWidget->addTab(newUser->myWidget, QString("User").append(QString::number(actualUsersCount)));
 }
 
 void NewProject::deleteUser(User* delUser )
@@ -99,13 +96,51 @@ void NewProject::deleteUser(User* delUser )
 
   for ( iter=users.begin(); iter!=users.end(); iter++ ) {
     if (*iter==delUser) {
-      sessionLayout->removeWidget(delUser->myGrid);
+     
       delete (delUser);
       users.erase(iter);
+      actualUsersCount--;
+      changeTabTitles();
       break;
     }
   }
 };
+
+void NewProject::deleteUser(QWidget* delUserWidget )
+{
+  QList<User*>::iterator iter;
+
+  for ( iter=users.begin(); iter!=users.end(); iter++ ) {
+    if ((*iter)->myWidget==delUserWidget) {
+      
+      delete (delUserWidget);
+      users.erase(iter);
+      actualUsersCount--;
+      numBox->setValue(actualUsersCount);
+      changeTabTitles();
+      break;
+    }
+  }
+};
+
+void NewProject::changeTabTitles()
+{
+  for (int i=0; i<=users.count(); i++) {
+    usersTabsWidget->setTabText(i, QString("User").append(QString::number(i+1)));
+  }
+
+}
+
+void NewProject::closeTabSlot(QWidget* delUserWidget)
+{
+  if (actualUsersCount>1) {
+    deleteUser(delUserWidget);
+  }
+}
+
+
+
+
 
 void NewProject::usersCountChangedSlot(int newCount)
 {
@@ -122,10 +157,8 @@ void NewProject::usersCountChangedSlot(int newCount)
    }
  }
  
- this->repaint();   
+ this->update();   
 }
-
-
 
 void NewProject::changeFolderSlot()
 {

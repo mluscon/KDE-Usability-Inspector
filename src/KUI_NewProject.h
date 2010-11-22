@@ -19,11 +19,12 @@
 
 #include <KDialog>
 #include <QList> 
+#include <QGridLayout>
 
-
-class QGridLayout;
 class QVBoxLayout;
 class QString;
+class KTabWidget;
+class QSpinBox;
 
 class User : public QObject {
   Q_OBJECT
@@ -34,7 +35,8 @@ class User : public QObject {
     
   public:
     User() { name="user"; age=1; };
-    QGridLayout *myGrid;
+    ~User() { delete myWidget; };
+    QWidget *myWidget;
     
   public slots:
     void changeName(QString newName) { name=newName; };
@@ -49,16 +51,20 @@ class NewProject : public KDialog {
     NewProject(QWidget* parent);
   
   private:
+    QSpinBox *numBox;
+    KTabWidget *usersTabsWidget;
     QList<User*> users;
     int actualUsersCount;
-    QVBoxLayout *sessionLayout;
     void adduser();
     void deleteUser(User*);
-  
+    void deleteUser(QWidget*);
+    void changeTabTitles();
+    
   private slots:
     void changeFolderSlot();
     void usersCountChangedSlot(int);
- 
+    void closeTabSlot(QWidget*);
+   
 };
 
 #endif
