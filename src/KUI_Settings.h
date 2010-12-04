@@ -14,57 +14,32 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
  ****************************************************************************************/
 
-#ifndef KUI_NEWPROJECT_H
-#define KUI_NEWPROJECT_H
+#include <QFSFileEngine>
+#include <QList>
+#include <QString>
 
-#include <KDialog>
-#include <QList> 
-#include <QGridLayout>
 
-class QVBoxLayout;
-class QString;
-class KTabWidget;
-class QSpinBox;
-
-class User : public QObject {
-  Q_OBJECT
+class User {
   
-  private:
+  protected:
     QString name;
     int age;
     
   public:
-    User() { name="user"; age=1; };
-    ~User() { delete myWidget; };
-    QWidget *myWidget;
-    
-  public slots:
-    void changeName(QString newName) { name=newName; };
-    void changeAge(int newAge) { age=newAge; };
+    User() { name="New User"; 
+             age=1; }
+    QString getName() { return name; }
 };
 
 
-class NewProject : public KDialog {
-  Q_OBJECT
+class ProjectSettings {
   
+  protected:
+    int usersCount;
+    QList<User*> *users;
+    QString projectFolder;
+    
   public:
-    NewProject(QWidget* parent);
-  
-  private:
-    QSpinBox *numBox;
-    KTabWidget *usersTabsWidget;
-    QList<User*> users;
-    int actualUsersCount;
-    void adduser();
-    void deleteUser(User*);
-    void deleteUser(QWidget*);
-    void changeTabTitles();
-    
-  private slots:
-    void changeFolderSlot();
-    void usersCountChangedSlot(int);
-    void closeTabSlot(QWidget*);
-   
+    ProjectSettings() { projectFolder=QFSFileEngine::homePath();
+                        usersCount=0; }
 };
-
-#endif

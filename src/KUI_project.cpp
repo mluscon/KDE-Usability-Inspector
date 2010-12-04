@@ -1,4 +1,4 @@
-/****************************************************************************************
+/***************************************************************************************
 * Copyright (c) 2010 Michal Luscon <mluscon@gmail.com>                                 *
 *                                                                                      *
 * This program is free software; you can redistribute it and/or modify it under        *
@@ -16,7 +16,7 @@
 
 #include "KUI_project.h"
 #include "KUI_MainToolBar.h"
-#include "KUI_NewProject.h"
+#include "KUI_NewProjectSettings.h"
 
 #include <KAction>
 #include <KLocale>
@@ -143,10 +143,11 @@ void KUI_project::setupConfig()
 
 void KUI_project::newFileSlot()
 {
-  NewProject *openNew = new NewProject(this);
+  NewProjectSettings *settings = new NewProjectSettings(this);
+  //NewProject *openNew = new NewProject(settings, this);
   
-  openNew->setModal(true);
-  openNew->show();
+  settings->setModal(true);
+  settings->show();
 }
 
 void KUI_project::saveFileSlot()

@@ -16,16 +16,17 @@ set( KUI_project_SRCS main.cpp
                       KUI_screenShotLabel.cpp
                       KUI_KuiCentralWidget.cpp
                       KUI_CameraWidget.cpp
-                      KUI_NewProject.cpp
+                      KUI_NewProjectSettings.cpp
                       KUI_record.cpp )
 
 kde4_add_executable(KUI_project ${KUI_project_SRCS})
 
-target_link_libraries(KUI_project ${KDE4_KDEUI_LIBS} 
-				  ${GSTREAMER_LIBRARIES} 
+target_link_libraries(KUI_project ${KDE4_KDEUI_LIBS}
+                                  ${GSTREAMER_LIBRARIES} 
 				  ${GSTREAMER_INTERFACE_LIBRARY}
 				  ${KDE4_PHONON_LIBRARY}
 				  gstcontroller-0.10
 				  X11
-				  gobject-2.0  )
+				  gobject-2.0
+                                  kio )
 
