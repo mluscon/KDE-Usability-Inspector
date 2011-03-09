@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.6)
 find_package(KDE4 REQUIRED)
 include_directories(${KDE4_INCLUDES})
 
-add_subdirectory(model)
+
 
 include(FindGStreamer.cmake) 
 include_directories( ${GSTREAMER_INCLUDE_DIR}) 
@@ -20,12 +20,11 @@ set( KUI_project_SRCS main.cpp
                       KUI_CameraWidget.cpp
                       KUI_NewProjectDialog.cpp
                       KUI_record.cpp
-                      domitem.cpp
-                      dommodel.cpp
-                      #KUI_Model.cpp
+                      model/domitem.cpp
+                      model/dommodel.cpp
                       )
 
-kde4_add_executable(KUI_project ${KUI_project_SRCS})
+kde4_add_executable(KUI_project ${KUI_project_SRCS} ${KUI_model_SRCS})
 
 target_link_libraries(KUI_project ${KDE4_KDEUI_LIBS}
                                   ${GSTREAMER_LIBRARIES} 

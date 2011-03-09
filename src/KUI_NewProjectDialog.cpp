@@ -15,7 +15,8 @@
  ****************************************************************************************/
 
 #include "KUI_NewProjectDialog.h"
-#include "dommodel.h"
+#include "./model/dommodel.h"
+#include "./model/domitem.h"
 
 #include <QListView>
 #include <QVBoxLayout>
@@ -33,6 +34,8 @@
 #include <QDebug>
 #include <QDomDocument>
 #include <QTreeView>
+#include <QModelIndex>
+#include <KLineEdit>
 
 
 NewProjectDialog::NewProjectDialog(QWidget* parent): KDialog(parent)
@@ -69,6 +72,8 @@ NewProjectDialog::NewProjectDialog(QWidget* parent): KDialog(parent)
   
   centraLayout->addLayout( project );
 
+
+  
 }
 
 void NewProjectDialog::setSessionFolder()
@@ -145,7 +150,7 @@ void NewProjectDialog::okButtonSlot()
 UsersEditationDialog::UsersEditationDialog(QWidget* parent, QString xuiPath ): KDialog( parent )
 {
   QWidget *central = new QWidget;
-  QVBoxLayout *centralLayout = new QVBoxLayout;
+  QGridLayout *centralLayout = new QGridLayout;
   central->setLayout( centralLayout );
   this->setMainWidget( central );
   
@@ -163,16 +168,18 @@ UsersEditationDialog::UsersEditationDialog(QWidget* parent, QString xuiPath ): K
   connect( removeUserButton, SIGNAL(clicked(bool)), this, SLOT(removeUser()) );
   buttonLayout->addWidget( removeUserButton, 0, 2 );
   
-  centralLayout->addLayout( buttonLayout );
+  centralLayout->addLayout( buttonLayout, 0, 0 );
   
-  
-
   
   model = new DomModel( xuiPath, this);
   tree = new QTreeView;
-  tree->setAllColumnsShowFocus(true);
-  list = new QListView;
   
+  connect( tree->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+           this, SLOT(updateMappers(QItemSelection,QItemSelection)) );
+  
+
+  
+  tree->setAllColumnsShowFocus(true);
   tree->setModel( model );
   tree->setRootIndex( model->index(0, 0, QModelIndex() ));
   tree->setColumnHidden( 1, true);
@@ -184,14 +191,24 @@ UsersEditationDialog::UsersEditationDialog(QWidget* parent, QString xuiPath ): K
   viewLayout->addWidget( tree );
 
   
-  centralLayout->addLayout( viewLayout );
+  centralLayout->addLayout( viewLayout, 1, 0 );
+  
+  QGridLayout *mapperLayout = new QGridLayout;
+  mapperLayout->addWidget( new QLabel(i18n("name:")), 0, 0 );
+  
+  QDataWidgetMapper *mapper = new QDataWidgetMapper;
+  mappers.append( mapper );
+  mapper->setModel( model );
+
+  KLineEdit *nameLine = new KLineEdit;
+  mapper->addMapping( nameLine, 0 );
+  mapperLayout->addWidget( nameLine, 0, 1 );
+  
+  centralLayout->addLayout( mapperLayout, 1, 1);
   
 
 }
 
-#include <QModelIndex>
-#include "domitem.h"
-#include <QDebug>
 
 void UsersEditationDialog::addUser()
 {
@@ -208,9 +225,21 @@ void UsersEditationDialog::addUser()
 void UsersEditationDialog::removeUser()
 {
   QModelIndex current = tree->selectionModel()->currentIndex();
-  model->removeRows( current.row(), 1, current.parent() );
+  DomItem *item = static_cast<DomItem*>( current.internalPointer() );
+  
+  if ( current.isValid() && item->node().nodeName()=="user" )
+    model->removeRows( current.row(), 1, current.parent() );
 
 }
 
 
+void UsersEditationDialog::updateMappers(QItemSelection first, QItemSelection last)
+{
+  QList<QDataWidgetMapper*>::iterator it;
+  for ( it=mappers.begin(); it!=mappers.end(); ++it ) {
+    (*it)->setCurrentIndex( tree->selectionModel()->currentIndex().row() );
+  }
+  
+
+}
 

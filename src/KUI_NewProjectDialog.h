@@ -18,6 +18,8 @@
 #define KUI_NEWPROJECT_H
 
 #include <KDialog>
+#include <QList>
+#include <QItemSelection>
 
 
 class DomModel;
@@ -27,6 +29,7 @@ class QDataWidgetMapper;
 class KLineEdit;
 class QTreeView;
 class QListView;
+
 
 class NewProjectDialog : public KDialog 
 {
@@ -48,19 +51,22 @@ private slots:
   
 };
 
+
 class UsersEditationDialog : public KDialog 
 {
   Q_OBJECT
   
 public:
-    UsersEditationDialog(QWidget* , QString);
+  UsersEditationDialog(QWidget* , QString);
 private:
-    DomModel *model;
-    QTreeView *tree;
-    QListView *list;
+  DomModel *model;
+  QTreeView *tree;
+  QListView *list;
+  QList<QDataWidgetMapper*> mappers;
 private slots:
-    void addUser();
-    void removeUser();
+  void addUser();
+  void removeUser();
+  void updateMappers(QItemSelection first, QItemSelection last);
 };
 
 
