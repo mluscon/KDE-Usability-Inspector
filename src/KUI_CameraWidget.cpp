@@ -24,6 +24,7 @@
 
 CameraWidget::CameraWidget(QWidget* parent): QWidget(parent)
 {  
+  
   cameraOK=true;
   this->setAttribute(Qt::WA_NativeWindow);
   
@@ -60,7 +61,7 @@ CameraWidget::CameraWidget(QWidget* parent): QWidget(parent)
     
   }
   
-  
+    
 }
 
 CameraWidget::~CameraWidget()

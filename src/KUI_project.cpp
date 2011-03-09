@@ -16,7 +16,7 @@
 
 #include "KUI_project.h"
 #include "KUI_MainToolBar.h"
-#include "KUI_NewProjectSettings.h"
+#include "KUI_NewProjectDialog.h"
 
 #include <KAction>
 #include <KLocale>
@@ -32,12 +32,17 @@
 #include <QFileDialog>
 #include <KConfig>
 #include <KConfigDialog>
+#include <QDomDocument>
+#include <QTextStream>
+#include <QIODevice>
+#include <QDomNode>
+#include <QFile>
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
   setupConfig();
   
-  this->resize(500,300);
+  this->resize(700,300);
     
   collection = new KActionCollection(this);
   defaultCentral = new KuiCentralWidget(this);
@@ -59,7 +64,7 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   this->setCentralWidget(defaultCentral);
   
   MainToolBar *playBar = new MainToolBar(this);
-  playBar->setAccessibleDescription("pica Bar");
+  playBar->setAccessibleDescription("Play Bar");
   
   this->addToolBar(Qt::BottomToolBarArea, playBar);
   
@@ -81,9 +86,11 @@ void KUI_project::setupMenuFile()
   fileMenu->addAction(collection->addAction("open_file", action));
   
   action = KStandardAction::save(this, SLOT(saveFileSlot()), collection);
+  action->setEnabled(false);
   fileMenu->addAction(collection->addAction("save_file", action)); 
   
   action = KStandardAction::saveAs(this, SLOT(saveAsFileSlot()), collection);
+  action->setEnabled(false);      
   fileMenu->addAction(collection->addAction("save_as_file", action));
   
   fileMenu->addSeparator();
@@ -141,13 +148,19 @@ void KUI_project::setupConfig()
 }
 
 
+
+
 void KUI_project::newFileSlot()
 {
-  NewProjectSettings *settings = new NewProjectSettings(this);
-  //NewProject *openNew = new NewProject(settings, this);
   
-  settings->setModal(true);
-  settings->show();
+  
+
+  NewProjectDialog *dialogSettings = new NewProjectDialog(this);
+    
+  dialogSettings->setModal(true);
+  dialogSettings->show();
+  
+  
 }
 
 void KUI_project::saveFileSlot()
@@ -157,17 +170,31 @@ void KUI_project::saveFileSlot()
 
 void KUI_project::openFileSlot()
 {
-  //QFileDialog *moj = new QFileDialog;
-  //moj->show();
+  KUrl url;
+  url.setDirectory(QDir::homePath());
+  QString path = KFileDialog::getOpenFileName(url, QString("*.xui"), this, QString("Open"));
+
+  if (path.isEmpty()) {
+    return;
+  }
   
+  QString projectFolder=path;
+   
   
 }
 
 void KUI_project::saveAsFileSlot()
 {
 
+
 }
 
+
+void KUI_project::setProject()
+{
+ 
+  
+}
 
 
   

@@ -18,8 +18,10 @@
 
 
 #include <QGridLayout>
-
 #include <QApplication>
+#include <QHBoxLayout>
+
+
 
 
 KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
@@ -28,13 +30,22 @@ KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
   
   camera = new CameraWidget(this);
   screen = new screenShotLabel(this);
+  QWidget *mediaWidget = new QWidget(this);
+  mediaWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+  QHBoxLayout *mediaLayout = new QHBoxLayout(this);
+  mediaLayout->addWidget(screen);
+  mediaLayout->addWidget(camera);
+  mediaWidget->setLayout(mediaLayout);
   
-   
-  centralLayout->addWidget(screen,0,0);
-  centralLayout->addWidget(camera,0,1);
+  usersList = new QListWidget(this);
+  usersList->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+  usersList->setMaximumWidth(100);
+  
+  centralLayout->addWidget(usersList,0,0);
+  centralLayout->addWidget(mediaWidget, 0, 1);
+    
   this->setLayout(centralLayout);
 }
-
 
 void KuiCentralWidget::cameraVis()
 {

@@ -21,7 +21,7 @@
 #include "KUI_screenShotLabel.h"
 
 #include <QWidget>
-
+#include <QListWidget>
 
 class KuiCentralWidget : public QWidget
 {
@@ -30,13 +30,19 @@ class KuiCentralWidget : public QWidget
   public:
     KuiCentralWidget(QWidget *parent);
  
-  private:
+  public:
     CameraWidget *camera;
     screenShotLabel *screen;
+    QListWidget *usersList;
     
   public slots:
     void screenVis();
     void cameraVis();
 };
+
+
+
+
+
 
 #endif

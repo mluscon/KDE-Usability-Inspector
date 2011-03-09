@@ -10,49 +10,61 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
  *                                                                                      *
- *  You should have received a copy of the GNU General Public License along with        *
+ * You should have received a copy of the GNU General Public License along with         *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
-****************************************************************************************/
+ ****************************************************************************************/
 
-#ifndef KUI_PROJECT_H
-#define KUI_PROJECT_H
+#ifndef KUI_NEWPROJECT_H
+#define KUI_NEWPROJECT_H
 
-#include "KUI_KuiCentralWidget.h"
+#include <KDialog>
 
-#include <KMainWindow>
 
-class KActionCollection;
-class KUrl;
-class KSystemTrayIcon;
-class KConfig;
+class DomModel;
+class KUIModel;
+class QString;
+class QDataWidgetMapper;
+class KLineEdit;
+class QTreeView;
+class QListView;
 
-class KUI_project : public KMainWindow
+class NewProjectDialog : public KDialog 
 {
   Q_OBJECT
   
-  public:
-    KUI_project(QWidget *parent=0);
-    void setProject();
-  private:
-    void setupConfig();
-    void setupMenuFile();
-    void setupMenuWindow();
-    void setupMenuSettings();
-    KMenuBar *menuBar; 
-    KActionCollection *collection;
-    KuiCentralWidget *defaultCentral;
-    KUrl *standartUrl;
-    KConfig *config;
-    
-    
-  private slots:
-    void newFileSlot();
-    void saveFileSlot();
-    void openFileSlot();
-    void saveAsFileSlot();
-    void preferencesSlot();
+public:
+  NewProjectDialog(QWidget* );
+private:
+  KLineEdit *folderLine;
+  KLineEdit *nameLine;
+  QString sessionFolder;
+  QString sessionName;
+  
+private slots:
+  void setSessionFolder();
+  void nameChanged(QString newName);
+  void folderChanged(QString newFolder);
+  void okButtonSlot();
+  
 };
-    
-    
-    
+
+class UsersEditationDialog : public KDialog 
+{
+  Q_OBJECT
+  
+public:
+    UsersEditationDialog(QWidget* , QString);
+private:
+    DomModel *model;
+    QTreeView *tree;
+    QListView *list;
+private slots:
+    void addUser();
+    void removeUser();
+};
+
+
+
+
+
 #endif

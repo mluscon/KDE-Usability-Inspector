@@ -98,8 +98,8 @@ KUIRecord::KUIRecord(QString format, struct rect recArea, char* location)
 			     NULL);
   
   gst_element_link_filtered (screenSource, screenColor, caps);
-  gst_element_link_many (screenColor, camQueue1, screenEnc, screenMux, screenSink, NULL);
-  gst_element_link_many (camSource, camQueue1, camColor, camRate, camEnc, camMux, camSink, NULL);
+  gst_element_link_many (screenColor, screenRate, screenEnc, screenMux, screenSink, NULL);
+  gst_element_link_many (camSource, camColor, camRate, camEnc, camMux, camSink, NULL);
   
   gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
