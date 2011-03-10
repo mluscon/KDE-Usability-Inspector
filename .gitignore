@@ -1,2 +1,5 @@
 *~
-*kdev4* 
+.kdev4/
+Usability\ Inspector.kdev4
+*build*
+.directory

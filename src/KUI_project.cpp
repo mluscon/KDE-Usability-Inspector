@@ -17,6 +17,7 @@
 #include "KUI_project.h"
 #include "KUI_MainToolBar.h"
 #include "KUI_NewProjectDialog.h"
+#include "model/dommodel.h"
 
 #include <KAction>
 #include <KLocale>
@@ -37,6 +38,7 @@
 #include <QIODevice>
 #include <QDomNode>
 #include <QFile>
+#include <QDebug>
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
@@ -77,7 +79,7 @@ void KUI_project::setupMenuFile()
   
   KMenu *fileMenu = new KMenu(i18n("&File"),this);
    
-  KAction *action = KStandardAction::openNew(this, SLOT(newFileSlot()), collection);
+  KAction *action = KStandardAction::openNew(this, SLOT(newProjectDialogSlot()), collection);
   fileMenu->addAction(collection->addAction("new_file", action));
   
   fileMenu->addSeparator();
@@ -150,18 +152,36 @@ void KUI_project::setupConfig()
 
 
 
-void KUI_project::newFileSlot()
+void KUI_project::newProjectDialogSlot()
 {
   
-  
-
   NewProjectDialog *dialogSettings = new NewProjectDialog(this);
-    
+  connect( dialogSettings, SIGNAL( newProjectEnd(QString)),
+           this, SLOT( userEditationSlot( QString )) );
+  
+  
   dialogSettings->setModal(true);
-  dialogSettings->show();
-  
-  
+  dialogSettings->show();   
 }
+
+void KUI_project::userEditationSlot( QString path )
+{
+  UsersEditationDialog *dialog = new UsersEditationDialog( this, path );
+  connect( dialog, SIGNAL( userEditationComplete(QString)),
+           this, SLOT(modelSetup(QString)) );
+  dialog->show();
+}
+
+void KUI_project::modelSetup(QString path)
+{
+  qDebug() << "opening model in: " << path;
+  model = new DomModel( path, this );
+  defaultCentral->setModel( model );
+}
+
+
+
+
 
 void KUI_project::saveFileSlot()
 {
@@ -179,7 +199,8 @@ void KUI_project::openFileSlot()
   }
   
   QString projectFolder=path;
-   
+  
+  modelSetup( path );
   
 }
 
@@ -195,6 +216,9 @@ void KUI_project::setProject()
  
   
 }
+
+
+
 
 
   

@@ -37,7 +37,7 @@ KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
   mediaLayout->addWidget(camera);
   mediaWidget->setLayout(mediaLayout);
   
-  usersList = new QListWidget(this);
+  usersList = new QListView(this);
   usersList->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
   usersList->setMaximumWidth(100);
   
@@ -67,5 +67,12 @@ void KuiCentralWidget::screenVis()
 
 }
 
+bool KuiCentralWidget::setModel(QAbstractItemModel* model )
+{
+  usersList->setModel( model );
+  usersList->setRootIndex( model->index(0, 0, QModelIndex()) );
+  
+  return true;
+}
 
 

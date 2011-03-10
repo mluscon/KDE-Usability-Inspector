@@ -20,6 +20,7 @@
 #include "KUI_KuiCentralWidget.h"
 
 #include <KMainWindow>
+#include "model/dommodel.h"
 
 class KActionCollection;
 class KUrl;
@@ -30,27 +31,33 @@ class KUI_project : public KMainWindow
 {
   Q_OBJECT
   
-  public:
-    KUI_project(QWidget *parent=0);
-    void setProject();
-  private:
-    void setupConfig();
-    void setupMenuFile();
-    void setupMenuWindow();
-    void setupMenuSettings();
-    KMenuBar *menuBar; 
-    KActionCollection *collection;
-    KuiCentralWidget *defaultCentral;
-    KUrl *standartUrl;
-    KConfig *config;
+public:
+  KUI_project(QWidget *parent=0);
+  void setProject();
+  
     
+private:
+  void setupConfig();
+  void setupMenuFile();
+  void setupMenuWindow();
+  void setupMenuSettings();
+  KMenuBar *menuBar; 
+  KActionCollection *collection;
+  KuiCentralWidget *defaultCentral;
+  KUrl *standartUrl;
+  KConfig *config;
+  DomModel *model;
     
-  private slots:
-    void newFileSlot();
-    void saveFileSlot();
-    void openFileSlot();
-    void saveAsFileSlot();
-    void preferencesSlot();
+private slots:
+  void newProjectDialogSlot();
+  void userEditationSlot( QString );
+  void modelSetup( QString );
+  void saveFileSlot();
+  void openFileSlot();
+  void saveAsFileSlot();
+  void preferencesSlot();
+  
+
 };
     
     

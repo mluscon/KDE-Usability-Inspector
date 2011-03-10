@@ -21,23 +21,29 @@
 #include "KUI_screenShotLabel.h"
 
 #include <QWidget>
-#include <QListWidget>
+#include <QListView>
+#include <QAbstractItemModel>
+
 
 class KuiCentralWidget : public QWidget
 {
+  
   Q_OBJECT
   
-  public:
-    KuiCentralWidget(QWidget *parent);
+public:
+  KuiCentralWidget(QWidget *parent);
  
-  public:
-    CameraWidget *camera;
-    screenShotLabel *screen;
-    QListWidget *usersList;
+private:
+  CameraWidget *camera;
+  screenShotLabel *screen;
+  QListView *usersList;
     
-  public slots:
-    void screenVis();
-    void cameraVis();
+public:
+  bool setModel( QAbstractItemModel* );
+    
+public slots:
+  void screenVis();
+  void cameraVis();
 };
 
 

@@ -101,7 +101,7 @@ void NewProjectDialog::okButtonSlot()
 {
   QDir directory( sessionFolder );
   if ( !directory.exists() ) {
-    KMessageBox::error( this, i18n("Session folder does not exist."), i18n("Error"));
+    KMessageBox::error( 0, i18n("Session folder does not exist."), i18n("Error"));
     return;
    }
 
@@ -110,7 +110,7 @@ void NewProjectDialog::okButtonSlot()
   QString xuiFilePath;
   xuiFilePath.append(sessionFolder);
   xuiFilePath.append(sessionName);
-  xuiFilePath.append( QString(".xml") );
+  xuiFilePath.append( QString(".xui") );
   
   QFile newFile( xuiFilePath );
   
@@ -139,9 +139,7 @@ void NewProjectDialog::okButtonSlot()
   
   newFile.close();
   
-  UsersEditationDialog *dialog = new UsersEditationDialog(this, xuiFilePath );
-  dialog->show();
-  
+  emit newProjectEnd( xuiFilePath );  
 }
 
 
@@ -149,6 +147,7 @@ void NewProjectDialog::okButtonSlot()
 
 UsersEditationDialog::UsersEditationDialog(QWidget* parent, QString xuiPath ): KDialog( parent )
 {
+  path = xuiPath;
   QWidget *central = new QWidget;
   QGridLayout *centralLayout = new QGridLayout;
   central->setLayout( centralLayout );
@@ -172,41 +171,44 @@ UsersEditationDialog::UsersEditationDialog(QWidget* parent, QString xuiPath ): K
   
   
   model = new DomModel( xuiPath, this);
-  tree = new QTreeView;
   
-  connect( tree->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-           this, SLOT(updateMappers(QItemSelection,QItemSelection)) );
+  list = new QTreeView;    
+  list->setModel( model );
+  list->setRootIndex( model->index( 0, 0, QModelIndex()) );
+  list->setMaximumWidth( 150 );
+  list->setColumnHidden( 1, true );
+  list->setColumnHidden( 2, true );
   
-
+  connect( list->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+           this, SLOT( updateMappers(QItemSelection,QItemSelection)) );
+   
   
-  tree->setAllColumnsShowFocus(true);
-  tree->setModel( model );
-  tree->setRootIndex( model->index(0, 0, QModelIndex() ));
-  tree->setColumnHidden( 1, true);
-  tree->setColumnHidden( 2, true);
-  tree->setHeaderHidden( true );
-
   
   QHBoxLayout *viewLayout = new QHBoxLayout;
-  viewLayout->addWidget( tree );
-
+  viewLayout->addWidget( list );
   
+    
   centralLayout->addLayout( viewLayout, 1, 0 );
   
   QGridLayout *mapperLayout = new QGridLayout;
   mapperLayout->addWidget( new QLabel(i18n("name:")), 0, 0 );
   
-  QDataWidgetMapper *mapper = new QDataWidgetMapper;
-  mappers.append( mapper );
+  mapper = new QDataWidgetMapper;
   mapper->setModel( model );
-
-  KLineEdit *nameLine = new KLineEdit;
+  mapper->setRootIndex( model->index( 0, 0, QModelIndex() ) );
+  mapper->toFirst();
+  mapper->setSubmitPolicy( QDataWidgetMapper::AutoSubmit );
+  
+  
+  nameLine = new KLineEdit;
   mapper->addMapping( nameLine, 0 );
   mapperLayout->addWidget( nameLine, 0, 1 );
   
   centralLayout->addLayout( mapperLayout, 1, 1);
   
-
+  connect( this, SIGNAL( okClicked() ),
+           this, SLOT( okButtonSlot() ) );
+  
 }
 
 
@@ -224,7 +226,7 @@ void UsersEditationDialog::addUser()
 
 void UsersEditationDialog::removeUser()
 {
-  QModelIndex current = tree->selectionModel()->currentIndex();
+  QModelIndex current = list->selectionModel()->currentIndex();
   DomItem *item = static_cast<DomItem*>( current.internalPointer() );
   
   if ( current.isValid() && item->node().nodeName()=="user" )
@@ -235,11 +237,20 @@ void UsersEditationDialog::removeUser()
 
 void UsersEditationDialog::updateMappers(QItemSelection first, QItemSelection last)
 {
-  QList<QDataWidgetMapper*>::iterator it;
-  for ( it=mappers.begin(); it!=mappers.end(); ++it ) {
-    (*it)->setCurrentIndex( tree->selectionModel()->currentIndex().row() );
-  }
+  mapper->setCurrentIndex( list->selectionModel()->currentIndex().row() );
+  nameLine->setText( (model->data( list->selectionModel()->currentIndex(), 0 )).toString() );
   
-
+  qDebug() << "current mapper index: " << mapper->currentIndex();
 }
+
+void UsersEditationDialog::okButtonSlot()
+{
+  qDebug() << "UsersEditationDialog okButtonSlot";
+  emit userEditationComplete( path );
+}
+
+
+
+
+
 

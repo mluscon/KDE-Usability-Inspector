@@ -46,17 +46,16 @@ QVariant DomModel::data(const QModelIndex &index, int role) const
      QDomNamedNodeMap attributeMap = node.attributes();
 
      switch (index.column()) {
-         case 0:
-             return node.toElement().attribute( "name", "Empty");
-         case 1:
-             for (int i = 0; i < attributeMap.count(); ++i) {
-                 QDomNode attribute = attributeMap.item(i);
-                 attributes << attribute.nodeName() + "=\""
-                               +attribute.nodeValue() + "\"";
-             }
-             return attributes.join(" ");
-         case 2:
-             return node.nodeValue().split("\n").join(" ");
+         case 0: if ( node.toElement().hasAttribute( "name" ) ) {
+                    return node.toElement().attribute( "name", "Empty");
+                 } else {
+                    return node.nodeName();
+                 }
+         case 1: return QString("trala");
+           
+             
+         case 2: return QString("trala");
+            
          default:
              return QVariant();
      }
@@ -165,12 +164,9 @@ bool DomModel::setData(const QModelIndex &index, const QVariant &value, int role
   domDocument.save(out, 4);
   domFile->close();
   
-  if ( item->node().nodeName() == "session" )  {
-    insertRows( 0, 0, index);
-  }
-  
   emit dataChanged(index, index);
   
+  qDebug() << "data changed";
   return true;  
 }
 
@@ -182,29 +178,31 @@ bool DomModel::insertRows(int position, int rows, const QModelIndex& parent)
   } else {
     parentItem = static_cast<DomItem*> ( parent.internalPointer() );
   }
+  
+  if ( parentItem->node().nodeName() == "session" ) {
     
-  QDomElement newNode = domDocument.createElement( "user" );
+    QDomElement newNode = domDocument.createElement( "user" );
   
-  newNode.setAttribute( "name", "New User");
-  parentItem->node().appendChild( newNode );
+    newNode.setAttribute( "name", "New User");
+    parentItem->node().appendChild( newNode );
   
-  qDebug() << "parent row: " << parentItem->row();
-  DomItem *newItem = new DomItem( newNode, parentItem->row()+1, parentItem);
+    qDebug() << "parent row: " << parentItem->row();
+    DomItem *newItem = new DomItem( newNode, parentItem->row()+1, parentItem);
   
-  beginInsertRows( parent, parentItem->row()+1, parentItem->row()+1 );
-  parentItem->appendChild( newItem );
-  endInsertRows();
+    beginInsertRows( parent, parentItem->row()+1, parentItem->row()+1 );
+    parentItem->appendChild( newItem );
+    endInsertRows();
   
-  if ( !domFile->open(QFile::WriteOnly) ) {
-    return false;
+    if ( !domFile->open(QFile::WriteOnly) ) {
+      return false;
+    }
+  
+    QTextStream out( domFile );
+    domDocument.save(out, 4);
+    domFile->close();
+    
+    return true;
   }
-  
-  QTextStream out( domFile );
-  domDocument.save(out, 4);
-  domFile->close();
-  
-  
-  return true; 
 }
 
 bool DomModel::removeRows(int position, int rows, const QModelIndex& parent)

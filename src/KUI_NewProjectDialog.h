@@ -28,7 +28,7 @@ class QString;
 class QDataWidgetMapper;
 class KLineEdit;
 class QTreeView;
-class QListView;
+class QTreeView;
 
 
 class NewProjectDialog : public KDialog 
@@ -48,7 +48,9 @@ private slots:
   void nameChanged(QString newName);
   void folderChanged(QString newFolder);
   void okButtonSlot();
-  
+
+signals:
+  void newProjectEnd(QString);  
 };
 
 
@@ -59,18 +61,24 @@ class UsersEditationDialog : public KDialog
 public:
   UsersEditationDialog(QWidget* , QString);
 private:
+  QString path;
   DomModel *model;
-  QTreeView *tree;
-  QListView *list;
-  QList<QDataWidgetMapper*> mappers;
+  QTreeView *list;
+  QDataWidgetMapper *mapper;
+  KLineEdit *nameLine;
 private slots:
   void addUser();
   void removeUser();
+  void okButtonSlot();
+  
+  
+public slots:
   void updateMappers(QItemSelection first, QItemSelection last);
+
+signals:
+  void userEditationComplete(QString );
+  
 };
-
-
-
 
 
 #endif
