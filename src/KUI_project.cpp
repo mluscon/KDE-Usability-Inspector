@@ -39,6 +39,10 @@
 #include <QDomNode>
 #include <QFile>
 #include <QDebug>
+#include <QLayout>
+#include <QHBoxLayout>
+#include <QListView>
+#include <QDebug>
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
@@ -47,7 +51,8 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   this->resize(700,300);
     
   collection = new KActionCollection(this);
-  defaultCentral = new KuiCentralWidget(this);
+  
+  setupCentralWidget();
   
   menuBar = new KMenuBar;
   setupMenuFile();
@@ -63,9 +68,9 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   tools->setToolButtonStyle(Qt::ToolButtonIconOnly);
   
   
-  this->setCentralWidget(defaultCentral);
+ 
   
-  MainToolBar *playBar = new MainToolBar(this);
+  playBar = new MainToolBar(this);
   playBar->setAccessibleDescription("Play Bar");
   
   this->addToolBar(Qt::BottomToolBarArea, playBar);
@@ -110,14 +115,14 @@ void KUI_project::setupMenuWindow()
   KAction *showDesktop = new KAction(i18n("Show &Desktop"),this);
   showDesktop->setCheckable(true);
   showDesktop->setChecked(true);
-  connect(showDesktop, SIGNAL(triggered(bool)), defaultCentral, SLOT(screenVis()));
+  //connect(showDesktop, SIGNAL(triggered(bool)), defaultCentral, SLOT(screenVis()));
   windowMenu->addAction(showDesktop);
   
   KAction *showCamera = new KAction(i18n("Show &Camera"),this);
   showCamera->setCheckable(true);
   showCamera->setChecked(true);
   windowMenu->addAction(showCamera);
-  connect(showCamera, SIGNAL(triggered(bool)), defaultCentral, SLOT(cameraVis()));
+  //connect(showCamera, SIGNAL(triggered(bool)), defaultCentral, SLOT(cameraVis()));
   menuBar->addMenu(windowMenu);
 }
 
@@ -136,18 +141,66 @@ void KUI_project::setupMenuSettings()
   settingsMenu->addAction(collection->addAction("configure_kui", action));
 }
 
-void KUI_project::preferencesSlot()
-{
-  //KConfigDialog *conf = new KConfigDialog(this, "KUI preferences", 
-
-
-}
-
-
 void KUI_project::setupConfig()
 {
   KConfig newconf("KUI_project");
 }
+
+
+void KUI_project::setupCentralWidget()
+{
+  QWidget *central = new QWidget( this );
+  QGridLayout *centralLayout = new QGridLayout( this );
+  central->setLayout( centralLayout );
+  
+  camera = new CameraWidget( this );
+  screen = new ScreenShotLabel( this );
+  QWidget *mediaWidget = new QWidget( this );
+  mediaWidget->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+  
+  QHBoxLayout *mediaLayout = new QHBoxLayout( this );
+  mediaLayout->addWidget(screen);
+  mediaLayout->addWidget(camera);
+  mediaWidget->setLayout(mediaLayout);
+  
+  usersList = new QListView(this);
+  usersList->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+  usersList->setMaximumWidth(100);
+
+  
+  
+  centralLayout->addWidget(usersList,0,0);
+  centralLayout->addWidget(mediaWidget, 0, 1);
+    
+  setCentralWidget( central );
+}
+
+
+void KUI_project::updateActions(QItemSelection selected, QItemSelection deselected)
+{
+  qDebug() << "updateActions";
+  
+  QModelIndex item = usersList->selectionModel()->currentIndex();
+  
+  item = model->index( item.row(), 1, item.parent());  
+  QVariant screen = model->data( item, Qt::DisplayRole );
+  
+  item = model->index( item.row(), 2, item.parent());  
+  QVariant camera = model->data( item, Qt::DisplayRole );
+    
+  qDebug() << (model->data( item, 0)).toString() << " " << screen.toString() << " " << camera.toString();
+  
+  if ( screen.toString() == "empty" || camera.toString() == "empty" ) {
+    playBar->updateInterface( Capture );
+    return;
+  }
+
+}
+
+
+
+
+
 
 
 
@@ -176,7 +229,12 @@ void KUI_project::modelSetup(QString path)
 {
   qDebug() << "opening model in: " << path;
   model = new DomModel( path, this );
-  defaultCentral->setModel( model );
+  usersList->setModel( model );
+  usersList->setRootIndex( model->index( 0, 0, QModelIndex() ));
+      
+  connect( usersList->selectionModel(), SIGNAL( selectionChanged(QItemSelection,QItemSelection)),
+           this, SLOT( updateActions(QItemSelection,QItemSelection)) );
+  
 }
 
 

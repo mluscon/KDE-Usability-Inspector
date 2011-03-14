@@ -21,11 +21,14 @@
 
 #include <KToolBar>
 
+
 class KActionCollection;
 class QSlider;
 class KSystemTrayIcon;
+class QAbstractItemModel;
 
-enum Mode { defaultMode, playingMode, pauseMode, stopMode };
+
+enum Mode { Default, Capture, PlayStart, Playing, Pause };
 
 class MainToolBar : public KToolBar
 {
@@ -38,9 +41,15 @@ class MainToolBar : public KToolBar
     struct rect area;
     KActionCollection *toolBarCollection;
     QSlider *timeSlider;
-    void updateInterface(Mode );
+    
     KSystemTrayIcon *trayIcon;
     KUIRecord *rec;
+    QAbstractItemModel *model;
+    
+public:
+  void updateInterface( Mode );
+  void setModel( QAbstractItemModel );
+ 
     
   public slots:
     void aimSlot();

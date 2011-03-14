@@ -17,15 +17,22 @@
 #ifndef KUI_PROJECT_H
 #define KUI_PROJECT_H
 
-#include "KUI_KuiCentralWidget.h"
+#include "model/dommodel.h"
+#include "KUI_CameraWidget.h"
+#include "KUI_ScreenShotLabel.h"
+
+
 
 #include <KMainWindow>
-#include "model/dommodel.h"
+
 
 class KActionCollection;
 class KUrl;
 class KSystemTrayIcon;
 class KConfig;
+class QListView;
+class QItemSelection;
+class MainToolBar;
 
 class KUI_project : public KMainWindow
 {
@@ -41,12 +48,19 @@ private:
   void setupMenuFile();
   void setupMenuWindow();
   void setupMenuSettings();
+  void setupCentralWidget();
+  
   KMenuBar *menuBar; 
   KActionCollection *collection;
-  KuiCentralWidget *defaultCentral;
   KUrl *standartUrl;
   KConfig *config;
+  
   DomModel *model;
+    
+  CameraWidget *camera;
+  ScreenShotLabel *screen;
+  QListView *usersList;
+  MainToolBar *playBar;
     
 private slots:
   void newProjectDialogSlot();
@@ -55,8 +69,7 @@ private slots:
   void saveFileSlot();
   void openFileSlot();
   void saveAsFileSlot();
-  void preferencesSlot();
-  
+  void updateActions( QItemSelection selected, QItemSelection deselected);
 
 };
     

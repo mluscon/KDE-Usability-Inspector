@@ -15,8 +15,7 @@ add_definitions(${GSTREAMER_DEFINITIONS})
 set( KUI_project_SRCS main.cpp 
                       KUI_project.cpp
                       KUI_MainToolBar.cpp
-                      KUI_screenShotLabel.cpp
-                      KUI_KuiCentralWidget.cpp
+                      KUI_ScreenShotLabel.cpp
                       KUI_CameraWidget.cpp
                       KUI_NewProjectDialog.cpp
                       KUI_record.cpp

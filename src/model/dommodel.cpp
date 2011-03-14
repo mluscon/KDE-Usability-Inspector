@@ -46,15 +46,25 @@ QVariant DomModel::data(const QModelIndex &index, int role) const
      QDomNamedNodeMap attributeMap = node.attributes();
 
      switch (index.column()) {
+         
          case 0: if ( node.toElement().hasAttribute( "name" ) ) {
-                    return node.toElement().attribute( "name", "Empty");
+                    return node.toElement().attribute( "name", "empty");
                  } else {
                     return node.nodeName();
                  }
-         case 1: return QString("trala");
+         
+         case 1: if ( node.toElement().hasAttribute( "screen" ) ) {
+                    return node.toElement().attribute( "screen", "empty");
+                 } else {
+                    return QString( "empty" );
+                 }
            
              
-         case 2: return QString("trala");
+         case 2: if ( node.toElement().hasAttribute( "camera" ) ) {
+                    return node.toElement().attribute( "camera", "empty");
+                 } else {
+                    return QString( "empty" );
+                 }
             
          default:
              return QVariant();

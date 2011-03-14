@@ -90,51 +90,61 @@ MainToolBar::MainToolBar(QWidget* parent): KToolBar(parent)
   toolBarCollection->addAction("lock",action);
   this->addAction(action);
   
-  updateInterface(defaultMode);
+  updateInterface( Default );
   
 }
 
 void MainToolBar::updateInterface(Mode mode)
 {
   switch (mode) {
-    case defaultMode:
-     (toolBarCollection->action("aim"))->setEnabled(true);
-     (toolBarCollection->action("play"))->setEnabled(false);
-     (toolBarCollection->action("stop"))->setEnabled(false);
-     timeSlider->setEnabled(false);
-     (toolBarCollection->action("lock"))->setEnabled(false);
+    case Default:
+     (toolBarCollection->action("aim"))->setEnabled( false );
+     (toolBarCollection->action("record"))->setEnabled( false );
+     (toolBarCollection->action("play"))->setEnabled( false );
+     (toolBarCollection->action("stop"))->setEnabled( false );
+     timeSlider->setEnabled( false );
+     (toolBarCollection->action("lock"))->setEnabled( false );
      break;
      
-     case playingMode:
-     (toolBarCollection->action("aim"))->setEnabled(false);
-     (toolBarCollection->action("play"))->setEnabled(true);
-     (toolBarCollection->action("stop"))->setEnabled(true);
-     timeSlider->setEnabled(true);
-     (toolBarCollection->action("lock"))->setEnabled(true);
+     case Capture:
+     (toolBarCollection->action("aim"))->setEnabled( true );
+     (toolBarCollection->action("record"))->setEnabled( true );
+     (toolBarCollection->action("play"))->setEnabled( false );
+     (toolBarCollection->action("stop"))->setEnabled( false );
+     timeSlider->setEnabled( false );
+     (toolBarCollection->action("lock"))->setEnabled( false );
+     break;
+          
+     case PlayStart:
+     (toolBarCollection->action("aim"))->setEnabled( false );
+     (toolBarCollection->action("record"))->setEnabled( false );
+     (toolBarCollection->action("play"))->setEnabled( true );
+     (toolBarCollection->action("stop"))->setEnabled( false );
+     timeSlider->setEnabled( false );
+     (toolBarCollection->action("lock"))->setEnabled( false );
      break;
      
-     case stopMode:
-     (toolBarCollection->action("aim"))->setEnabled(false);
-     (toolBarCollection->action("play"))->setEnabled(true);
-     (toolBarCollection->action("stop"))->setEnabled(false);
-     timeSlider->setEnabled(false);
-     (toolBarCollection->action("lock"))->setEnabled(true);
+     case Playing:
+     (toolBarCollection->action("aim"))->setEnabled( false );
+     (toolBarCollection->action("record"))->setEnabled( false );
+     (toolBarCollection->action("play"))->setEnabled( false );
+     (toolBarCollection->action("stop"))->setEnabled( true );
+     timeSlider->setEnabled( true );
+     (toolBarCollection->action("lock"))->setEnabled( false );
      break;
      
-     case pauseMode:
-     (toolBarCollection->action("aim"))->setEnabled(true);
-     (toolBarCollection->action("play"))->setEnabled(true);
-     (toolBarCollection->action("stop"))->setEnabled(true);
-     timeSlider->setEnabled(true);
-     (toolBarCollection->action("lock"))->setEnabled(true);
+     case Pause:
+     (toolBarCollection->action("aim"))->setEnabled( false );
+     (toolBarCollection->action("record"))->setEnabled( false );
+     (toolBarCollection->action("play"))->setEnabled( true );
+     (toolBarCollection->action("stop"))->setEnabled( false );
+     timeSlider->setEnabled( true );
+     (toolBarCollection->action("lock"))->setEnabled( false );
      break;
   }
     
 
 }
-
-
-
 
 void MainToolBar::aimSlot()
 {

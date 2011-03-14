@@ -19,12 +19,12 @@
 
 #include <QLabel>
 
-class screenShotLabel : public QLabel
+class ScreenShotLabel : public QLabel
 {
   Q_OBJECT
   
   public:
-    screenShotLabel(QWidget *parent);
+    ScreenShotLabel(QWidget *parent);
     void resizeEvent(QResizeEvent *event);
   
   public slots:

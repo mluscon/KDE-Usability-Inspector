@@ -41,6 +41,10 @@ KuiCentralWidget::KuiCentralWidget(QWidget* parent): QWidget(parent)
   usersList->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
   usersList->setMaximumWidth(100);
   
+  connect ( usersList->selectionModel(), SIGNAL( selectionChanged(QItemSelection,QItemSelection)),
+            
+  
+  
   centralLayout->addWidget(usersList,0,0);
   centralLayout->addWidget(mediaWidget, 0, 1);
     

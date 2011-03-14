@@ -14,7 +14,7 @@
 * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
 ****************************************************************************************/
 
-#include "KUI_screenShotLabel.h"
+#include "KUI_ScreenShotLabel.h"
 
 #include <QApplication>
 #include <QPixmap>
@@ -24,7 +24,7 @@
 #include <X11/Xlib.h>  
 
 
-screenShotLabel::screenShotLabel(QWidget* parent): QLabel(parent)
+ScreenShotLabel::ScreenShotLabel(QWidget* parent): QLabel(parent)
 {
   this->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Ignored);
   
@@ -33,7 +33,7 @@ screenShotLabel::screenShotLabel(QWidget* parent): QLabel(parent)
   connect(timer, SIGNAL(timeout()), this, SLOT(pictureUpdate()));
 }
 
-void screenShotLabel::resizeEvent(QResizeEvent* event)
+void ScreenShotLabel::resizeEvent(QResizeEvent* event)
 {
     pictureUpdate();
     QWidget::resizeEvent(event);
@@ -41,7 +41,7 @@ void screenShotLabel::resizeEvent(QResizeEvent* event)
 
 
 
-void screenShotLabel::pictureUpdate()
+void ScreenShotLabel::pictureUpdate()
 {
   QPixmap grabedPixmap = QPixmap::grabWindow(QApplication::desktop()->winId());
   

@@ -44,6 +44,9 @@ public:
 public slots:
   void screenVis();
   void cameraVis();
+  
+signals:
+  
 };
 
 
