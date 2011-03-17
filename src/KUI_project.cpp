@@ -43,9 +43,23 @@
 #include <QHBoxLayout>
 #include <QListView>
 #include <QDebug>
+#include <KSystemTrayIcon>
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/cursorfont.h>
+
+
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
+  
+  trayIcon = new KSystemTrayIcon("media-playback-stop", 0);
+  connect(trayIcon, SIGNAL( activated(QSystemTrayIcon::ActivationReason)), 
+          this, SLOT( unhideSlot() ) );
+  
+  
+  recArea.setCoords( 0, 0, 0, 0);
   setupConfig();
   
   this->resize(700,300);
@@ -66,11 +80,11 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   tools->addAction(collection->action("open_file"));
   tools->addAction(collection->action("save_file"));
   tools->setToolButtonStyle(Qt::ToolButtonIconOnly);
-  
-  
  
+  setupActions();
   
-  playBar = new MainToolBar(this);
+  playBar = new MainToolBar( collection, this);
+  
   playBar->setAccessibleDescription("Play Bar");
   
   this->addToolBar(Qt::BottomToolBarArea, playBar);
@@ -175,11 +189,42 @@ void KUI_project::setupCentralWidget()
   setCentralWidget( central );
 }
 
+void KUI_project::setupActions()
+{
+  
+  KAction *action = new KAction(this);
+  
+  action->setIcon(KIcon("edit-delete"));
+  action->setText(i18n("&Aim"));
+  collection->addAction("aim", action);
+  connect(action, SIGNAL(triggered(bool)), this, SLOT(aimSlot()));
+  
+  
+  action = new KAction(this);
+  action->setIcon(KIcon("media-record"));
+  action->setText(i18n("&Record"));
+  connect(action, SIGNAL(triggered(bool)), this, SLOT(recordSlot()));
+  collection->addAction("record", action);
+  
+  
+  action = new KAction(this);
+  action->setIcon(KIcon("media-playback-start"));
+  action->setText(i18n("&Play"));
+  connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), this , SLOT(playSlot()));
+  collection->addAction("play",action);
+
+    
+  action = new KAction(this);
+  action->setIcon(KIcon("media-playback-stop"));
+  action->setText(i18n("&Stop"));
+  connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), this , SLOT(stopSlot()));
+  collection->addAction("stop",action);
+ 
+}
+
 
 void KUI_project::updateActions(QItemSelection selected, QItemSelection deselected)
 {
-  qDebug() << "updateActions";
-  
   QModelIndex item = usersList->selectionModel()->currentIndex();
   
   item = model->index( item.row(), 1, item.parent());  
@@ -188,19 +233,13 @@ void KUI_project::updateActions(QItemSelection selected, QItemSelection deselect
   item = model->index( item.row(), 2, item.parent());  
   QVariant camera = model->data( item, Qt::DisplayRole );
     
-  qDebug() << (model->data( item, 0)).toString() << " " << screen.toString() << " " << camera.toString();
-  
+
   if ( screen.toString() == "empty" || camera.toString() == "empty" ) {
     playBar->updateInterface( Capture );
     return;
   }
 
 }
-
-
-
-
-
 
 
 
@@ -228,6 +267,10 @@ void KUI_project::userEditationSlot( QString path )
 void KUI_project::modelSetup(QString path)
 {
   qDebug() << "opening model in: " << path;
+  
+  if ( !model  )
+    delete model;
+  
   model = new DomModel( path, this );
   usersList->setModel( model );
   usersList->setRootIndex( model->index( 0, 0, QModelIndex() ));
@@ -248,6 +291,7 @@ void KUI_project::saveFileSlot()
 
 void KUI_project::openFileSlot()
 {
+  
   KUrl url;
   url.setDirectory(QDir::homePath());
   QString path = KFileDialog::getOpenFileName(url, QString("*.xui"), this, QString("Open"));
@@ -275,7 +319,96 @@ void KUI_project::setProject()
   
 }
 
+void KUI_project::aimSlot()
+{
+  Display *dpy = XOpenDisplay(NULL);
+  
+  int status;
+  Cursor cursor;
+  XEvent event;
+  Window target_win = None, root = RootWindow(dpy,NULL);
+  int buttons = 0;
 
+  cursor = XCreateFontCursor(dpy, XC_crosshair);
+
+  status = XGrabPointer(dpy, root, False,
+                        ButtonPressMask|ButtonReleaseMask, GrabModeSync,
+                        GrabModeAsync, root, cursor, CurrentTime);
+  
+  while ((target_win == None) || (buttons != 0)) {
+   
+    XAllowEvents(dpy, SyncPointer, CurrentTime);
+    XWindowEvent(dpy, root, ButtonPressMask|ButtonReleaseMask, &event);
+    switch (event.type) {
+    case ButtonPress:
+      if (target_win == None) {
+        target_win = event.xbutton.subwindow; 
+        if (target_win == None) target_win = root;
+      }
+      buttons++;
+      break;
+    case ButtonRelease:
+      if (buttons > 0)
+        buttons--;
+       break;
+    }
+  } 
+
+  XUngrabPointer(dpy, CurrentTime);    
+
+  XWindowAttributes selWin;
+  XGetWindowAttributes(dpy, target_win, &selWin);
+  
+  
+  recArea.setTopLeft( QPoint( selWin.x, selWin.y ) );
+  recArea.setBottomRight( QPoint( selWin.x+selWin.width, selWin.y+selWin.height ) );
+
+  XCloseDisplay(dpy);
+}
+
+void KUI_project::recordSlot()
+{
+  trayIcon->show();
+  this->setVisible(false);
+  
+  QModelIndex item = usersList->selectionModel()->currentIndex();
+  item = model->index( item.row(), 0, item.parent());  
+  QString name = model->data( item, Qt::DisplayRole ).toString();
+    
+  QString path = model->path();
+  path.append( "/" ).append( name );
+  
+  QString camera = path;
+  QString screen = path;
+  
+  camera.append( "_camera" );
+  screen.append( "_screen" );
+  
+  recorder = new KUIRecord(QString("avi"), recArea, camera, screen );
+}
+
+void KUI_project::unhideSlot()
+{
+  delete recorder;
+  trayIcon->setVisible(false);
+  this->setVisible(true);
+  
+}
+
+void KUI_project::pauseSlot()
+{
+
+}
+
+void KUI_project::playSlot()
+{
+
+}
+
+void KUI_project::stopSlot()
+{
+
+}
 
 
 

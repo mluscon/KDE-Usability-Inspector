@@ -6,6 +6,7 @@
 #include <QModelIndex>
 #include <QVariant>
 #include <QFile>
+#include <QDir>
 
 class DomItem;
 
@@ -33,6 +34,9 @@ public:
                   const QModelIndex &parent = QModelIndex());  
   bool removeRows(int position, int rows,
                   const QModelIndex &parent = QModelIndex());
+  QString path();
+  
+  
 private:
   QFile *domFile;
   QDomDocument domDocument;

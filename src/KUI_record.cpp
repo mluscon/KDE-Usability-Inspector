@@ -17,13 +17,16 @@
 #include <gst/gst.h>
 #include <iostream>
 #include <QString>
+#include <QRect>
+#include <QDebug>
+#include <cstring>
 
 #include "KUI_record.h"
 
 
-KUIRecord::KUIRecord(QString format, struct rect recArea, char* location)
-{ 
-  
+KUIRecord::KUIRecord(QString format, QRect area, QString camera, QString screen )
+{
+
   GstElement *camSource, *camQueue1, *camColor, *camRate, *camMux, *camQueue2, *camSink;
 
   camSource = gst_element_factory_make ("v4l2src", "camSource");
@@ -58,18 +61,32 @@ KUIRecord::KUIRecord(QString format, struct rect recArea, char* location)
 
   pipeline = gst_pipeline_new ("recorder");
   
-  std::cout << recArea.startx << " : ";
-  std::cout << recArea.starty << std::endl;
-  std::cout << recArea.endx << " : ";
-  std::cout << recArea.endy << std::endl;
+
+  
+  qDebug() << camera;
+  qDebug() << screen;
+  
+  char cameraChar[ camera.length()+1 ];
+  memset( cameraChar, 0, camera.length()+1 );
+  
+  char screenChar[ screen.length()+1 ];
+  memset( screenChar, 0, screen.length()+1 );
+  
+  for ( int i=0; i!=camera.length(); ++i ) {
+    cameraChar[i] = camera.at(i).toAscii();
+  }
+  
+  for ( int i=0; i!=screen.length(); ++i ) {
+    screenChar[i] = screen.at(i).toAscii();
+  }
   
   //g_object_set (G_OBJECT (screenSource), "use-damage", true , NULL);
-  g_object_set (G_OBJECT (screenSource), "startx", recArea.startx , NULL);
-  g_object_set (G_OBJECT (screenSource), "starty", recArea.starty , NULL);
-  g_object_set (G_OBJECT (screenSource), "endx", recArea.endx , NULL);
-  g_object_set (G_OBJECT (screenSource), "endy", recArea.endy , NULL);
-  g_object_set (G_OBJECT (camSink), "location", "/home/michal/camera.avi",  NULL);
-  g_object_set (G_OBJECT (screenSink), "location", "/home/michal/screen.avi",  NULL);
+  g_object_set (G_OBJECT (screenSource), "startx", area.topLeft().x() , NULL);
+  g_object_set (G_OBJECT (screenSource), "starty", area.topLeft().y() , NULL);
+  g_object_set (G_OBJECT (screenSource), "endx", area.bottomRight().x() , NULL);
+  g_object_set (G_OBJECT (screenSource), "endy", area.bottomRight().y() , NULL);
+  g_object_set (G_OBJECT (camSink), "location", cameraChar,  NULL);
+  g_object_set (G_OBJECT (screenSink), "location", screenChar,  NULL);
   
   GstCaps *caps;
 

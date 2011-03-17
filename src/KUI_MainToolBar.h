@@ -25,7 +25,7 @@
 class KActionCollection;
 class QSlider;
 class KSystemTrayIcon;
-class QAbstractItemModel;
+
 
 
 enum Mode { Default, Capture, PlayStart, Playing, Pause };
@@ -35,30 +35,17 @@ class MainToolBar : public KToolBar
   Q_OBJECT
   
   public:
-    MainToolBar(QWidget *parent);
+    MainToolBar(KActionCollection* collection, QWidget *parent);
   
   private:
-    struct rect area;
+    
     KActionCollection *toolBarCollection;
     QSlider *timeSlider;
     
-    KSystemTrayIcon *trayIcon;
-    KUIRecord *rec;
-    QAbstractItemModel *model;
-    
+
 public:
   void updateInterface( Mode );
-  void setModel( QAbstractItemModel );
- 
-    
-  public slots:
-    void aimSlot();
-    void playSlot();
-    void recordSlot();
-    void pauseSlot();
-    void stopSlot();
-    void lockSlot();
-    void unhideSlot();
+   
 };
 
 

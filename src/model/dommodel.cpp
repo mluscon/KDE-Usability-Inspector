@@ -14,6 +14,8 @@ DomModel::DomModel(QString path , QObject *parent) : QAbstractItemModel(parent)
     return;
   }
   
+  
+  
   domDocument.setContent( domFile );
   domFile->close();
   
@@ -22,8 +24,11 @@ DomModel::DomModel(QString path , QObject *parent) : QAbstractItemModel(parent)
 
 DomModel::~DomModel()
 {
-  delete rootItem;
-  delete domFile;  
+  if ( !rootItem )
+    delete rootItem;
+  
+  if ( !domFile )
+    delete domFile;  
 }
 
 int DomModel::columnCount(const QModelIndex &/*parent*/) const
@@ -242,3 +247,8 @@ bool DomModel::removeRows(int position, int rows, const QModelIndex& parent)
   return true;
 }
 
+QString DomModel::path()
+{
+  QFileInfo info( *domFile );
+  return info.absoluteDir().absolutePath();
+}

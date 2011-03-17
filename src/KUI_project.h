@@ -20,7 +20,7 @@
 #include "model/dommodel.h"
 #include "KUI_CameraWidget.h"
 #include "KUI_ScreenShotLabel.h"
-
+#include "KUI_record.h"
 
 
 #include <KMainWindow>
@@ -33,6 +33,7 @@ class KConfig;
 class QListView;
 class QItemSelection;
 class MainToolBar;
+class QRect;
 
 class KUI_project : public KMainWindow
 {
@@ -42,16 +43,18 @@ public:
   KUI_project(QWidget *parent=0);
   void setProject();
   
-    
+  KActionCollection *collection;
+  
 private:
   void setupConfig();
   void setupMenuFile();
   void setupMenuWindow();
   void setupMenuSettings();
   void setupCentralWidget();
+  void setupActions();
   
   KMenuBar *menuBar; 
-  KActionCollection *collection;
+  
   KUrl *standartUrl;
   KConfig *config;
   
@@ -61,6 +64,12 @@ private:
   ScreenShotLabel *screen;
   QListView *usersList;
   MainToolBar *playBar;
+  
+  QRect recArea;
+  
+  KSystemTrayIcon *trayIcon;
+  
+  KUIRecord *recorder;
     
 private slots:
   void newProjectDialogSlot();
@@ -70,7 +79,13 @@ private slots:
   void openFileSlot();
   void saveAsFileSlot();
   void updateActions( QItemSelection selected, QItemSelection deselected);
-
+  
+  void aimSlot();
+  void playSlot();
+  void recordSlot();
+  void pauseSlot();
+  void stopSlot();
+  void unhideSlot();
 };
     
     

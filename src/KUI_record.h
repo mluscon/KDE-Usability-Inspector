@@ -14,18 +14,13 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
 ****************************************************************************************/
 
+#ifndef KUI_RECORD_H
+#define KUI_RECORD_H
+
 #include <gst/gst.h>
 
 class QString;
-
-struct rect {
-  int startx;
-  int starty;
-  int endx;
-  int endy;
-};
-
-
+class QRect;
 
 class KUIRecord {
   private:
@@ -34,6 +29,8 @@ class KUIRecord {
     GstElement *camEnc;
     
   public:
-    KUIRecord(QString, struct rect, char*);
+    KUIRecord(QString format, QRect area, QString camera, QString screen );
     ~KUIRecord();
 };
+
+#endif
