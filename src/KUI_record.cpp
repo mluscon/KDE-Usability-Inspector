@@ -61,6 +61,9 @@ KUIRecord::KUIRecord(QString format, QRect area, QString camera, QString screen 
 
   pipeline = gst_pipeline_new ("recorder");
   
+  camera.append( "." ).append( format );
+  screen.append( "." ).append( format );
+  
 
   
   qDebug() << camera;

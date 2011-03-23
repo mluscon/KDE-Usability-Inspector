@@ -1,3 +1,22 @@
+/***************************************************************************************
+* Copyright (c) 2010 Michal Luscon <mluscon@gmail.com>                                 *
+*                                                                                      *
+* This program is free software; you can redistribute it and/or modify it under        *
+* the terms of the GNU General Public License as published by the Free Software        *
+* Foundation; either version 2 of the License, or (at your option) any later           *
+* version.                                                                             *
+*                                                                                      *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY      *
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A      *
+* PARTICULAR PURPOSE. See the GNU General Public License for more details.             *
+*                                                                                      *
+* You should have received a copy of the GNU General Public License along with         *
+* this program.  If not, see <http://www.gnu.org/licenses/>.                           *
+****************************************************************************************/
+
+
+
+
 #include <QtGui>
 #include <QtXml>
 #include <KMessageBox>
@@ -162,7 +181,18 @@ bool DomModel::setData(const QModelIndex &index, const QVariant &value, int role
   
   DomItem *item = static_cast<DomItem*>( index.internalPointer() );
   
-  item->node().toElement().setAttribute("name", value.toString());
+  switch ( index.column() ) {
+    
+    case 0: item->node().toElement().setAttribute("name", value.toString());
+    break;
+    
+    case 1: item->node().toElement().setAttribute("camera", value.toString() );
+    break;
+    
+    case 2: item->node().toElement().setAttribute("screen", value.toString() );
+    break;
+    
+  }
   
   if ( domFile->exists() ) {
     if ( !domFile->remove() ) {
@@ -218,6 +248,35 @@ bool DomModel::insertRows(int position, int rows, const QModelIndex& parent)
     
     return true;
   }
+  
+  if ( parentItem->node().nodeName() == "user" ) {
+    
+    QDomElement newNode = domDocument.createElement( "video" );
+  
+    newNode.setAttribute( "screen", "empty");
+    newNode.setAttribute( "camera", "empty");
+    parentItem->node().appendChild( newNode );
+  
+    qDebug() << "parent row: " << parentItem->row();
+    DomItem *newItem = new DomItem( newNode, parentItem->row()+1, parentItem);
+  
+    beginInsertRows( parent, parentItem->row()+1, parentItem->row()+1 );
+    parentItem->appendChild( newItem );
+    endInsertRows();
+  
+    if ( !domFile->open(QFile::WriteOnly) ) {
+      return false;
+    }
+  
+    QTextStream out( domFile );
+    domDocument.save(out, 4);
+    domFile->close();
+    
+    return true;
+  }  
+  
+  
+  return false;
 }
 
 bool DomModel::removeRows(int position, int rows, const QModelIndex& parent)
@@ -247,8 +306,3 @@ bool DomModel::removeRows(int position, int rows, const QModelIndex& parent)
   return true;
 }
 
-QString DomModel::path()
-{
-  QFileInfo info( *domFile );
-  return info.absoluteDir().absolutePath();
-}

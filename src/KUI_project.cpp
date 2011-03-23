@@ -54,15 +54,17 @@
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
   
-  trayIcon = new KSystemTrayIcon("media-playback-stop", 0);
+  trayIcon = new KSystemTrayIcon("media-playback-stop", 0 );
   connect(trayIcon, SIGNAL( activated(QSystemTrayIcon::ActivationReason)), 
           this, SLOT( unhideSlot() ) );
+  
+  path.append( QDir::homePath() );
   
   
   recArea.setCoords( 0, 0, 0, 0);
   setupConfig();
   
-  this->resize(700,300);
+  this->resize( 700, 300 );
     
   collection = new KActionCollection(this);
   
@@ -91,6 +93,10 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   
 }
 
+KUI_project::~KUI_project()
+{
+  delete trayIcon;
+}
 
 
 void KUI_project::setupMenuFile()
@@ -238,6 +244,11 @@ void KUI_project::updateActions(QItemSelection selected, QItemSelection deselect
     playBar->updateInterface( Capture );
     return;
   }
+  
+  if ( screen.toString() != "empty" && camera.toString() != "empty" ) {
+    playBar->updateInterface( PlayStart );
+    return;
+  }
 
 }
 
@@ -264,19 +275,30 @@ void KUI_project::userEditationSlot( QString path )
   dialog->show();
 }
 
-void KUI_project::modelSetup(QString path)
+void KUI_project::modelSetup(QString modelPath)
 {
   qDebug() << "opening model in: " << path;
   
   if ( !model  )
     delete model;
   
-  model = new DomModel( path, this );
+  model = new DomModel( modelPath, this );
+  
+  KUrl url;
+  url.setPath( modelPath );
+  
+  path = url.directory();
+  QDir::setCurrent( path );
+  
+  qDebug() << "changing current directory: " << path; 
+  
   usersList->setModel( model );
   usersList->setRootIndex( model->index( 0, 0, QModelIndex() ));
       
   connect( usersList->selectionModel(), SIGNAL( selectionChanged(QItemSelection,QItemSelection)),
            this, SLOT( updateActions(QItemSelection,QItemSelection)) );
+  
+  playBar->updateInterface( Default );
   
 }
 
@@ -293,16 +315,22 @@ void KUI_project::openFileSlot()
 {
   
   KUrl url;
-  url.setDirectory(QDir::homePath());
-  QString path = KFileDialog::getOpenFileName(url, QString("*.xui"), this, QString("Open"));
-
-  if (path.isEmpty()) {
+  url.setDirectory( path );
+  QString modelPath = KFileDialog::getOpenFileName(url, QString("*.xui"), this, QString("Open"));
+  
+  url.setPath( modelPath );
+  
+  path = url.directory();
+  QDir::setCurrent( path );
+  
+  qDebug() << "New path: " << path;
+  
+  if (modelPath.isEmpty()) {
     return;
   }
   
-  QString projectFolder=path;
-  
-  modelSetup( path );
+
+  modelSetup( modelPath );
   
 }
 
@@ -375,8 +403,8 @@ void KUI_project::recordSlot()
   item = model->index( item.row(), 0, item.parent());  
   QString name = model->data( item, Qt::DisplayRole ).toString();
     
-  QString path = model->path();
-  path.append( "/" ).append( name );
+  QString path;
+  path.append( "./" ).append( name );
   
   QString camera = path;
   QString screen = path;
@@ -385,6 +413,13 @@ void KUI_project::recordSlot()
   screen.append( "_screen" );
   
   recorder = new KUIRecord(QString("avi"), recArea, camera, screen );
+  
+  camera.append( ".avi" );
+  screen.append( ".avi" );
+  
+  model->setData( model->index( item.row(), 1, item.parent() ), camera, Qt::EditRole );
+  model->setData( model->index( item.row(), 2, item.parent() ), screen, Qt::EditRole );
+  
 }
 
 void KUI_project::unhideSlot()

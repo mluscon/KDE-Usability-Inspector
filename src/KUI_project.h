@@ -41,6 +41,7 @@ class KUI_project : public KMainWindow
   
 public:
   KUI_project(QWidget *parent=0);
+  ~KUI_project();
   void setProject();
   
   KActionCollection *collection;
@@ -70,6 +71,8 @@ private:
   KSystemTrayIcon *trayIcon;
   
   KUIRecord *recorder;
+  
+  QString path;
     
 private slots:
   void newProjectDialogSlot();
@@ -78,7 +81,7 @@ private slots:
   void saveFileSlot();
   void openFileSlot();
   void saveAsFileSlot();
-  void updateActions( QItemSelection selected, QItemSelection deselected);
+  void updateActions( QItemSelection selected, QItemSelection deselected );
   
   void aimSlot();
   void playSlot();
