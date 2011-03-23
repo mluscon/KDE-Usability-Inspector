@@ -45,6 +45,7 @@
 #include <QDebug>
 #include <KSystemTrayIcon>
 
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
@@ -90,6 +91,8 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   playBar->setAccessibleDescription("Play Bar");
   
   this->addToolBar(Qt::BottomToolBarArea, playBar);
+  
+  
   
 }
 
@@ -178,7 +181,7 @@ void KUI_project::setupCentralWidget()
   QWidget *mediaWidget = new QWidget( this );
   mediaWidget->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
   
-  QHBoxLayout *mediaLayout = new QHBoxLayout( this );
+  mediaLayout = new QHBoxLayout( this );
   mediaLayout->addWidget(screen);
   mediaLayout->addWidget(camera);
   mediaWidget->setLayout(mediaLayout);
@@ -187,12 +190,21 @@ void KUI_project::setupCentralWidget()
   usersList->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
   usersList->setMaximumWidth(100);
 
-  
-  
   centralLayout->addWidget(usersList,0,0);
   centralLayout->addWidget(mediaWidget, 0, 1);
     
   setCentralWidget( central );
+  
+  screenVideo = new Phonon::VideoPlayer( this );
+  screenVideo->setVisible( false );
+  mediaLayout->addWidget( screenVideo );
+  
+  cameraVideo = new Phonon::VideoPlayer( this );
+  cameraVideo->setVisible( false );
+  mediaLayout->addWidget( cameraVideo );
+  
+  cameraAudio = new Phonon::AudioOutput( this );
+
 }
 
 void KUI_project::setupActions()
@@ -234,24 +246,39 @@ void KUI_project::updateActions(QItemSelection selected, QItemSelection deselect
   QModelIndex item = usersList->selectionModel()->currentIndex();
   
   item = model->index( item.row(), 1, item.parent());  
-  QVariant screen = model->data( item, Qt::DisplayRole );
+  QVariant screenPath = model->data( item, Qt::DisplayRole );
   
   item = model->index( item.row(), 2, item.parent());  
-  QVariant camera = model->data( item, Qt::DisplayRole );
+  QVariant cameraPath = model->data( item, Qt::DisplayRole );
     
 
-  if ( screen.toString() == "empty" || camera.toString() == "empty" ) {
+  if ( screenPath.toString() == "empty" || cameraPath.toString() == "empty" ) {
     playBar->updateInterface( Capture );
+    screenVideo->setVisible( false );
+    cameraVideo->setVisible( false );
+    screen->setVisible( true );
+    camera->setVisible( true );
     return;
   }
   
-  if ( screen.toString() != "empty" && camera.toString() != "empty" ) {
+  if ( screenPath.toString() != "empty" && cameraPath.toString() != "empty" ) {
+    Phonon::MediaSource screenSource( screenPath.toString() );
+    Phonon::MediaSource cameraSource( cameraPath.toString() );
+    
+    cameraVideo->load( cameraSource );
+    cameraVideo->setMinimumSize( 200, 200);
+      
+    screenVideo->load( screenSource );
+      
     playBar->updateInterface( PlayStart );
+    screen->setVisible( false );
+    camera->setVisible( false );    
+    screenVideo->setVisible( true );
+    cameraVideo->setVisible( true );
     return;
   }
 
 }
-
 
 
 
@@ -317,6 +344,9 @@ void KUI_project::openFileSlot()
   KUrl url;
   url.setDirectory( path );
   QString modelPath = KFileDialog::getOpenFileName(url, QString("*.xui"), this, QString("Open"));
+  
+  if ( modelPath.isEmpty() )
+    return;
   
   url.setPath( modelPath );
   
@@ -438,10 +468,28 @@ void KUI_project::pauseSlot()
 void KUI_project::playSlot()
 {
 
+  connect( this, SIGNAL( playVideo() ),  cameraVideo, SLOT( play() ) );
+  connect( this, SIGNAL( playVideo() ), screenVideo, SLOT( play() ) );
+  
+  connect( cameraVideo, SIGNAL( finished() ), this, SLOT( stopSlot() ) );
+  connect( screenVideo, SIGNAL( finished() ), this, SLOT( stopSlot() ) );
+  
+  playBar->updateInterface( Playing );
+  
+  emit playVideo();
 }
 
 void KUI_project::stopSlot()
 {
+  cameraVideo->stop();
+  screenVideo->stop();
+  
+  playBar->updateInterface( PlayStart );
+}
+
+void KUI_project::seekSlot( int seek )
+{
+  
 
 }
 

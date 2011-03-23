@@ -20,12 +20,12 @@
 #include "KUI_record.h"
 
 #include <KToolBar>
-
+#include <Phonon/SeekSlider>
 
 class KActionCollection;
 class QSlider;
 class KSystemTrayIcon;
-
+class QTimer;
 
 
 enum Mode { Default, Capture, PlayStart, Playing, Pause };
@@ -36,15 +36,17 @@ class MainToolBar : public KToolBar
   
   public:
     MainToolBar(KActionCollection* collection, QWidget *parent);
-  
-  private:
-    
-    KActionCollection *toolBarCollection;
     QSlider *timeSlider;
     
+    void updateInterface( Mode );
+    
+  private:
+    KActionCollection *toolBarCollection;
+    QTimer *timer;
+    
+private slots:
 
-public:
-  void updateInterface( Mode );
+
    
 };
 

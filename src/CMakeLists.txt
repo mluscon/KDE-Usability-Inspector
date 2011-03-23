@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.6)
 find_package(KDE4 REQUIRED)
 include_directories(${KDE4_INCLUDES})
 
-
+include_directories(${KDE4_PHONON_INCLUDES} )
 
 include(FindGStreamer.cmake) 
 include_directories( ${GSTREAMER_INCLUDE_DIR}) 
@@ -32,6 +32,7 @@ target_link_libraries(KUI_project ${KDE4_KDEUI_LIBS}
                                   ${X11_LIBRARIES}
                                   ${GOBJECT_LIBRARIES}
                                   ${KDE4_KIO_LIBRARY}
+                                  ${KDE4_PHONON_LIBRARY}
                                   gstcontroller-0.10
                                   gobject-2.0
                                   )

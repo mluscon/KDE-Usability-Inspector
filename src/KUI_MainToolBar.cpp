@@ -19,37 +19,36 @@
 
 #include <KAction>
 #include <KLocale>
-#include <KStandardAction>
-#include <KActionCollection>
 #include <QSlider>
 #include <QLayout>
-#include <KSystemTrayIcon>
+#include <QTimer>
+#include <KActionCollection>
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/cursorfont.h>
+
 
 
 MainToolBar::MainToolBar(KActionCollection* collection, QWidget* parent): KToolBar( parent)
 {
   
-  this->setToolButtonStyle(Qt::ToolButtonIconOnly);
+  timer = new QTimer( this );
+  
+  setToolButtonStyle(Qt::ToolButtonIconOnly);
   
   toolBarCollection = collection;
   
-  this->addAction( toolBarCollection->action("aim"));
-  
-  this->addAction( toolBarCollection->action("record"));
-
-  this->addAction( toolBarCollection->action("play"));
-
-  this->addAction( toolBarCollection->action("stop"));
-  
-  this->addSeparator();
-  
-  
+  addAction( toolBarCollection->action("aim"));
+  addAction( toolBarCollection->action("record"));
+  addAction( toolBarCollection->action("play"));
+  addAction( toolBarCollection->action("stop"));
+  addSeparator();
+    
   timeSlider = new QSlider(this);
   timeSlider->setOrientation(Qt::Horizontal);
+  timeSlider->setMinimum( 0 );
+  timeSlider->setMaximum( 1000 );
+  
+  
+  
   this->addWidget(timeSlider);
   
   this->addSeparator();
@@ -67,6 +66,7 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( false );
      (toolBarCollection->action("stop"))->setEnabled( false );
      timeSlider->setEnabled( false );
+     timer->stop();
      break;
      
      case Capture:
@@ -75,6 +75,7 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( false );
      (toolBarCollection->action("stop"))->setEnabled( false );
      timeSlider->setEnabled( false );
+     timer->stop();
      break;
           
      case PlayStart:
@@ -83,6 +84,7 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( true );
      (toolBarCollection->action("stop"))->setEnabled( false );
      timeSlider->setEnabled( false );
+     timer->stop();
      break;
      
      case Playing:
@@ -91,6 +93,7 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( false );
      (toolBarCollection->action("stop"))->setEnabled( true );
      timeSlider->setEnabled( true );
+     timer->start( 500 );
      break;
      
      case Pause:
@@ -99,6 +102,7 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( true );
      (toolBarCollection->action("stop"))->setEnabled( false );
      timeSlider->setEnabled( true );
+     timer->stop();
      break;
   }
     
