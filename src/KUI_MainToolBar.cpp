@@ -23,15 +23,12 @@
 #include <QLayout>
 #include <QTimer>
 #include <KActionCollection>
-
+#include <QDebug>
 
 
 
 MainToolBar::MainToolBar(KActionCollection* collection, QWidget* parent): KToolBar( parent)
 {
-  
-  timer = new QTimer( this );
-  
   setToolButtonStyle(Qt::ToolButtonIconOnly);
   
   toolBarCollection = collection;
@@ -45,7 +42,7 @@ MainToolBar::MainToolBar(KActionCollection* collection, QWidget* parent): KToolB
   timeSlider = new QSlider(this);
   timeSlider->setOrientation(Qt::Horizontal);
   timeSlider->setMinimum( 0 );
-  timeSlider->setMaximum( 1000 );
+
   
   
   
@@ -66,7 +63,7 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( false );
      (toolBarCollection->action("stop"))->setEnabled( false );
      timeSlider->setEnabled( false );
-     timer->stop();
+     timeSlider->setValue( 0 );
      break;
      
      case Capture:
@@ -75,7 +72,7 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( false );
      (toolBarCollection->action("stop"))->setEnabled( false );
      timeSlider->setEnabled( false );
-     timer->stop();
+     timeSlider->setValue( 0 );
      break;
           
      case PlayStart:
@@ -84,7 +81,7 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( true );
      (toolBarCollection->action("stop"))->setEnabled( false );
      timeSlider->setEnabled( false );
-     timer->stop();
+     timeSlider->setValue( 0 );
      break;
      
      case Playing:
@@ -93,7 +90,6 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( false );
      (toolBarCollection->action("stop"))->setEnabled( true );
      timeSlider->setEnabled( true );
-     timer->start( 500 );
      break;
      
      case Pause:
@@ -102,9 +98,15 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("play"))->setEnabled( true );
      (toolBarCollection->action("stop"))->setEnabled( false );
      timeSlider->setEnabled( true );
-     timer->stop();
      break;
   }
     
+
+}
+
+void MainToolBar::timeShift()
+{
+ 
+  timeSlider->setValue( (timeSlider->value() + 1 ) );
 
 }

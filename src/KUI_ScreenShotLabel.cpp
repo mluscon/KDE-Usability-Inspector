@@ -29,7 +29,7 @@ ScreenShotLabel::ScreenShotLabel(QWidget* parent): QLabel(parent)
   this->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Ignored);
   
   timer = new QTimer(this);
-  timer->start(1000);
+  timer->start( 1000 );
   connect(timer, SIGNAL(timeout()), this, SLOT(pictureUpdate()));
 }
 

@@ -44,11 +44,12 @@
 #include <QListView>
 #include <QDebug>
 #include <KSystemTrayIcon>
-
+#include <QDockWidget>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
+#include <QTimer>
 
 
 
@@ -91,7 +92,8 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   playBar->setAccessibleDescription("Play Bar");
   
   this->addToolBar(Qt::BottomToolBarArea, playBar);
-  
+  connect( playBar->timeSlider, SIGNAL( sliderMoved(int) ),
+	   this, SLOT( seekSlot(int) ) );
   
   
 }
@@ -99,6 +101,9 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 KUI_project::~KUI_project()
 {
   delete trayIcon;
+  
+  if ( !timer )
+    delete timer; 
 }
 
 
@@ -190,6 +195,7 @@ void KUI_project::setupCentralWidget()
   usersList->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
   usersList->setMaximumWidth(100);
 
+  
   centralLayout->addWidget(usersList,0,0);
   centralLayout->addWidget(mediaWidget, 0, 1);
     
@@ -231,13 +237,13 @@ void KUI_project::setupActions()
   connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), this , SLOT(playSlot()));
   collection->addAction("play",action);
 
-    
   action = new KAction(this);
   action->setIcon(KIcon("media-playback-stop"));
   action->setText(i18n("&Stop"));
   connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), this , SLOT(stopSlot()));
   collection->addAction("stop",action);
  
+  
 }
 
 
@@ -271,6 +277,8 @@ void KUI_project::updateActions(QItemSelection selected, QItemSelection deselect
     screenVideo->load( screenSource );
       
     playBar->updateInterface( PlayStart );
+    
+  
     screen->setVisible( false );
     camera->setVisible( false );    
     screenVideo->setVisible( true );
@@ -456,7 +464,12 @@ void KUI_project::unhideSlot()
 {
   delete recorder;
   trayIcon->setVisible(false);
+  
+  updateActions( QItemSelection(), QItemSelection() );
+  
   this->setVisible(true);
+  
+  
   
 }
 
@@ -476,11 +489,21 @@ void KUI_project::playSlot()
   
   playBar->updateInterface( Playing );
   
+  timer = new QTimer();
+  connect( timer, SIGNAL( timeout() ), playBar, SLOT( timeShift() ) );
+  timer->start( 1000 );
+     
   emit playVideo();
+  
+  qDebug() << "Video length: " << cameraVideo->totalTime()/1000;
+  playBar->timeSlider->setMaximum( cameraVideo->totalTime() / 1000 );
+  
 }
 
 void KUI_project::stopSlot()
 {
+  timer->stop();
+    
   cameraVideo->stop();
   screenVideo->stop();
   
@@ -489,7 +512,9 @@ void KUI_project::stopSlot()
 
 void KUI_project::seekSlot( int seek )
 {
-  
+  cameraVideo->seek( seek*1000 );
+  screenVideo->seek( seek*1000 );
+
 
 }
 

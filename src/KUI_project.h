@@ -24,6 +24,7 @@
 
 
 #include <KMainWindow>
+#include <QItemSelection>
 #include <Phonon/VideoPlayer>
 #include <Phonon/AudioOutput>
 #include <Phonon/MediaSource>
@@ -33,11 +34,10 @@ class KUrl;
 class KSystemTrayIcon;
 class KConfig;
 class QListView;
-class QItemSelection;
 class MainToolBar;
 class QRect;
 class QHBoxLayout;
-
+class QTimer;
 
 class KUI_project : public KMainWindow
 {
@@ -71,7 +71,7 @@ private:
   Phonon::VideoPlayer *screenVideo;
   Phonon::VideoPlayer *cameraVideo;
   Phonon::AudioOutput *cameraAudio;
- 
+  QTimer *timer;
   
   QListView *usersList;
   MainToolBar *playBar;
@@ -100,8 +100,7 @@ private slots:
   void stopSlot();
   void unhideSlot();
   void seekSlot( int );
-  
-  
+
 signals:
   void playVideo();
     

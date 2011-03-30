@@ -25,6 +25,8 @@
 CameraWidget::CameraWidget(QWidget* parent): QWidget(parent)
 {  
   
+  setMaximumSize( 200, 170 );
+    
   cameraOK=true;
   this->setAttribute(Qt::WA_NativeWindow);
   

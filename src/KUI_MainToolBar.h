@@ -30,21 +30,22 @@ class QTimer;
 
 enum Mode { Default, Capture, PlayStart, Playing, Pause };
 
-class MainToolBar : public KToolBar
+class MainToolBar : public KToolBar 
 {
   Q_OBJECT
   
   public:
     MainToolBar(KActionCollection* collection, QWidget *parent);
     QSlider *timeSlider;
-    
+
     void updateInterface( Mode );
-    
+
   private:
     KActionCollection *toolBarCollection;
-    QTimer *timer;
-    
-private slots:
+
+
+public slots:
+  void timeShift();
 
 
    
