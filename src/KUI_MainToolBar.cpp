@@ -76,8 +76,8 @@ void MainToolBar::updateInterface(Mode mode)
      break;
           
      case PlayStart:
-     (toolBarCollection->action("aim"))->setEnabled( false );
-     (toolBarCollection->action("record"))->setEnabled( false );
+     (toolBarCollection->action("aim"))->setEnabled( true );
+     (toolBarCollection->action("record"))->setEnabled( true );
      (toolBarCollection->action("play"))->setEnabled( true );
      (toolBarCollection->action("stop"))->setEnabled( false );
      timeSlider->setEnabled( false );

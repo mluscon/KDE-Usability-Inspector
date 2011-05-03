@@ -27,6 +27,7 @@ class KUIRecord {
     GstElement *pipeline;
     GstElement *screenEnc;
     GstElement *camEnc;
+    GstElement *audioEnc;
     
   public:
     KUIRecord(QString format, QRect area, QString camera, QString screen );

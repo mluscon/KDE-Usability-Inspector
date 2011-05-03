@@ -249,6 +249,8 @@ void KUI_project::setupActions()
 
 void KUI_project::updateActions(QItemSelection selected, QItemSelection deselected)
 {
+  stopSlot();
+  
   QModelIndex item = usersList->selectionModel()->currentIndex();
   
   item = model->index( item.row(), 1, item.parent());  
@@ -502,10 +504,14 @@ void KUI_project::playSlot()
 
 void KUI_project::stopSlot()
 {
-  timer->stop();
-    
-  cameraVideo->stop();
-  screenVideo->stop();
+  if ( timer != 0 )
+    timer->stop();
+  
+  if ( cameraVideo != 0 )
+    cameraVideo->stop();
+  
+  if ( screenVideo != 0 )
+    screenVideo->stop();
   
   playBar->updateInterface( PlayStart );
 }
