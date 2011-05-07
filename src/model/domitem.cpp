@@ -16,6 +16,7 @@
 
 
 #include <QtXml>
+#include <QFile>
 
  #include "domitem.h"
 
@@ -28,11 +29,11 @@
  }
 
  DomItem::~DomItem()
- {/*
-     QList<int,DomItem*>::iterator it;
+ {
+     QList<DomItem*>::iterator it;
      for (it = childItems.begin(); it != childItems.end(); ++it)
-         delete it.value();
-     */
+         delete *it;
+
  }
 
  QDomNode DomItem::node() const
@@ -64,8 +65,13 @@ DomItem *DomItem::child(int i)
 
  int DomItem::row()
  {
-     return rowNumber;
- }
+  
+   for( int i=0; i<parent()->childItems.count(); ++i) {
+     if ( this == parent()->childItems.at( i ) )
+       return i;
+   }
+   return -1;
+}
  
 bool DomItem::appendChild(DomItem *child)
 {
@@ -75,15 +81,25 @@ bool DomItem::appendChild(DomItem *child)
   return true;
 }
 
-bool DomItem::removeChild( int i)
+bool DomItem::removeChild( int i )
 {
+  
+  qDebug() <<"childitems:"<< childItems.count();
+  qDebug() <<"rownumber:" << rowNumber;
   
   if ( i >= childItems.count() )
     return false;
   
-  if ( childItems.count() <= 0 || rowNumber == 0 )
+  if ( childItems.count() <= 0 )
     return false;
   
+  QDomNode remNode = childItems.at( i )->node();
+  
+  if ( remNode.toElement().hasAttribute("camera") )
+    QFile::remove( remNode.toElement().attribute("camera"));
+  
+  if ( remNode.toElement().hasAttribute("screen") )
+    QFile::remove( remNode.toElement().attribute("screen"));  
   
   node().removeChild( childItems.at( i )->node() );
   childItems.removeAt( i );

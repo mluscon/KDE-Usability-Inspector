@@ -27,8 +27,7 @@ class KUIModel;
 class QString;
 class QDataWidgetMapper;
 class KLineEdit;
-class QTreeView;
-class QTreeView;
+class QListView;
 
 
 class NewProjectDialog : public KDialog 
@@ -63,7 +62,7 @@ public:
 private:
   QString path;
   DomModel *model;
-  QTreeView *list;
+  QListView *list;
   QDataWidgetMapper *mapper;
   KLineEdit *nameLine;
 private slots:

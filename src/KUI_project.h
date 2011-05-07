@@ -38,6 +38,7 @@ class MainToolBar;
 class QRect;
 class QHBoxLayout;
 class QTimer;
+class QTreeView;
 
 class KUI_project : public KMainWindow
 {
@@ -97,15 +98,16 @@ private slots:
   void playSlot();
   void recordSlot();
   void pauseSlot();
+  void playAfterPauseSlot();
   void stopSlot();
   void unhideSlot();
   void seekSlot( int );
+  void addSlot();
+  void removeSlot();
 
 signals:
   void playVideo();
-    
+
 };
-    
-    
-    
+
 #endif

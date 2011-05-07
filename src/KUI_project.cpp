@@ -18,6 +18,7 @@
 #include "KUI_MainToolBar.h"
 #include "KUI_NewProjectDialog.h"
 #include "model/dommodel.h"
+#include "model/domitem.h"
 
 #include <KAction>
 #include <KLocale>
@@ -45,6 +46,7 @@
 #include <QDebug>
 #include <KSystemTrayIcon>
 #include <QDockWidget>
+#include <QTreeView>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -55,6 +57,7 @@
 
 KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
 {
+  model = 0;
   
   trayIcon = new KSystemTrayIcon("media-playback-stop", 0 );
   connect(trayIcon, SIGNAL( activated(QSystemTrayIcon::ActivationReason)), 
@@ -79,13 +82,19 @@ KUI_project::KUI_project(QWidget* parent): KMainWindow(parent)
   menuBar->addMenu(helpMenu());
   this->setMenuBar(menuBar);
   
+  setupActions();
+  
   KToolBar *tools = new KToolBar(i18n("&Tools"), this);
   tools->addAction(collection->action("new_file"));
   tools->addAction(collection->action("open_file"));
-  tools->addAction(collection->action("save_file"));
+  tools->addAction(collection->action("add"));
+  collection->action("add")->setEnabled( false );
+  tools->addAction(collection->action("remove"));
+  collection->action("remove")->setEnabled( false );
+  //tools->addAction(collection->action("save_file"));
   tools->setToolButtonStyle(Qt::ToolButtonIconOnly);
  
-  setupActions();
+  
   
   playBar = new MainToolBar( collection, this);
   
@@ -122,11 +131,11 @@ void KUI_project::setupMenuFile()
   
   action = KStandardAction::save(this, SLOT(saveFileSlot()), collection);
   action->setEnabled(false);
-  fileMenu->addAction(collection->addAction("save_file", action)); 
+  //fileMenu->addAction(collection->addAction("save_file", action)); 
   
   action = KStandardAction::saveAs(this, SLOT(saveAsFileSlot()), collection);
   action->setEnabled(false);      
-  fileMenu->addAction(collection->addAction("save_as_file", action));
+  //fileMenu->addAction(collection->addAction("save_as_file", action));
   
   fileMenu->addSeparator();
   
@@ -193,7 +202,7 @@ void KUI_project::setupCentralWidget()
   
   usersList = new QListView(this);
   usersList->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
-  usersList->setMaximumWidth(100);
+  usersList->setMaximumWidth(150);
 
   
   centralLayout->addWidget(usersList,0,0);
@@ -238,20 +247,67 @@ void KUI_project::setupActions()
   collection->addAction("play",action);
 
   action = new KAction(this);
+  action->setIcon(KIcon("media-playback-pause"));
+  action->setText(i18n("&Pause"));
+  connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), this , SLOT(pauseSlot()));
+  collection->addAction("pause",action);
+    
+  action = new KAction(this);
   action->setIcon(KIcon("media-playback-stop"));
   action->setText(i18n("&Stop"));
   connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), this , SLOT(stopSlot()));
   collection->addAction("stop",action);
  
+  action = new KAction(this);
+  action->setIcon(KIcon("media-playback-start"));
+  action->setText(i18n("&Play"));
+  connect(action, SIGNAL(triggered(Qt::MouseButtons,Qt::KeyboardModifiers)), this , SLOT(playAfterPauseSlot()));
+  collection->addAction("playAfterPause",action);
   
+  action = new KAction(this);
+  action->setIcon(KIcon("list-add"));
+  action->setText(i18n("&Add"));
+  connect(action, SIGNAL(triggered(bool)), this, SLOT(addSlot()));
+  collection->addAction("add", action);
+  
+  action = new KAction(this);
+  action->setIcon(KIcon("list-remove"));
+  action->setText(i18n("&Remove"));
+  connect(action, SIGNAL(triggered(bool)), this, SLOT(removeSlot()));
+  collection->addAction("remove", action);
 }
 
 
 void KUI_project::updateActions(QItemSelection selected, QItemSelection deselected)
 {
-  stopSlot();
+  if ( model == 0 )
+    return;      
+  
+  if ( timer != 0 )
+    timer->stop();
+  
+  if ( cameraVideo != 0 )
+    cameraVideo->stop();
+  
+  if ( screenVideo != 0 )
+    screenVideo->stop();
   
   QModelIndex item = usersList->selectionModel()->currentIndex();
+   
+  if ( !item.isValid() ) {
+   
+   qDebug() << "Item is not valid";
+   
+   (collection->action("remove"))->setEnabled( false );
+   
+   playBar->updateInterface( Default );
+   return;
+  } 
+   
+  qDebug() << "Item is valid";
+  (collection->action("add"))->setEnabled( true );
+  (collection->action("remove"))->setEnabled( true );
+   
   
   item = model->index( item.row(), 1, item.parent());  
   QVariant screenPath = model->data( item, Qt::DisplayRole );
@@ -273,14 +329,14 @@ void KUI_project::updateActions(QItemSelection selected, QItemSelection deselect
     Phonon::MediaSource screenSource( screenPath.toString() );
     Phonon::MediaSource cameraSource( cameraPath.toString() );
     
+    
     cameraVideo->load( cameraSource );
     cameraVideo->setMinimumSize( 200, 200);
       
     screenVideo->load( screenSource );
       
     playBar->updateInterface( PlayStart );
-    
-  
+      
     screen->setVisible( false );
     camera->setVisible( false );    
     screenVideo->setVisible( true );
@@ -294,14 +350,15 @@ void KUI_project::updateActions(QItemSelection selected, QItemSelection deselect
 
 void KUI_project::newProjectDialogSlot()
 {
+  updateActions(QItemSelection(), QItemSelection());
   
+ 
   NewProjectDialog *dialogSettings = new NewProjectDialog(this);
   connect( dialogSettings, SIGNAL( newProjectEnd(QString)),
            this, SLOT( userEditationSlot( QString )) );
   
-  
   dialogSettings->setModal(true);
-  dialogSettings->show();   
+  dialogSettings->show();
 }
 
 void KUI_project::userEditationSlot( QString path )
@@ -331,17 +388,14 @@ void KUI_project::modelSetup(QString modelPath)
   
   usersList->setModel( model );
   usersList->setRootIndex( model->index( 0, 0, QModelIndex() ));
-      
+
   connect( usersList->selectionModel(), SIGNAL( selectionChanged(QItemSelection,QItemSelection)),
            this, SLOT( updateActions(QItemSelection,QItemSelection)) );
   
   playBar->updateInterface( Default );
+  collection->action("add")->setEnabled( true );
   
 }
-
-
-
-
 
 void KUI_project::saveFileSlot()
 {
@@ -350,6 +404,7 @@ void KUI_project::saveFileSlot()
 
 void KUI_project::openFileSlot()
 {
+  updateActions(QItemSelection(), QItemSelection());
   
   KUrl url;
   url.setDirectory( path );
@@ -452,10 +507,10 @@ void KUI_project::recordSlot()
   camera.append( "_camera" );
   screen.append( "_screen" );
   
-  recorder = new KUIRecord(QString("avi"), recArea, camera, screen );
+  recorder = new KUIRecord(QString("ogg"), recArea, camera, screen );
   
-  camera.append( ".avi" );
-  screen.append( ".avi" );
+  camera.append( ".ogg" );
+  screen.append( ".ogg" );
   
   model->setData( model->index( item.row(), 1, item.parent() ), camera, Qt::EditRole );
   model->setData( model->index( item.row(), 2, item.parent() ), screen, Qt::EditRole );
@@ -477,12 +532,37 @@ void KUI_project::unhideSlot()
 
 void KUI_project::pauseSlot()
 {
-
+  if ( timer != 0 )
+    timer->stop();
+  
+  if ( cameraVideo != 0 )
+    cameraVideo->pause();
+  
+  if ( screenVideo != 0 )
+    screenVideo->pause();
+  
+  playBar->updateInterface( Pause );
 }
+
+void KUI_project::playAfterPauseSlot()
+{
+  if ( timer != 0 )
+    timer->start();
+  
+  if ( cameraVideo != 0 )
+    cameraVideo->play();
+  
+  if ( screenVideo != 0 )
+    screenVideo->play();
+
+  playBar->updateInterface( Playing );
+}
+
+
 
 void KUI_project::playSlot()
 {
-
+  qDebug() << "start playing";
   connect( this, SIGNAL( playVideo() ),  cameraVideo, SLOT( play() ) );
   connect( this, SIGNAL( playVideo() ), screenVideo, SLOT( play() ) );
   
@@ -492,6 +572,7 @@ void KUI_project::playSlot()
   playBar->updateInterface( Playing );
   
   timer = new QTimer();
+  
   connect( timer, SIGNAL( timeout() ), playBar, SLOT( timeShift() ) );
   timer->start( 1000 );
      
@@ -499,22 +580,28 @@ void KUI_project::playSlot()
   
   qDebug() << "Video length: " << cameraVideo->totalTime()/1000;
   playBar->timeSlider->setMaximum( cameraVideo->totalTime() / 1000 );
-  
+
 }
 
 void KUI_project::stopSlot()
 {
   if ( timer != 0 )
     timer->stop();
+
+
   
   if ( cameraVideo != 0 )
     cameraVideo->stop();
+
   
   if ( screenVideo != 0 )
     screenVideo->stop();
   
   playBar->updateInterface( PlayStart );
+  
 }
+
+
 
 void KUI_project::seekSlot( int seek )
 {
@@ -523,6 +610,33 @@ void KUI_project::seekSlot( int seek )
 
 
 }
+
+void KUI_project::addSlot()
+{
+  QModelIndex sessionIndex = model->index(0, 0,QModelIndex());
+  DomItem *sessionItem = static_cast<DomItem*> ( sessionIndex.internalPointer() );
+  qDebug() << sessionItem->node().nodeName();
+  
+  model->insertRows(0,1, sessionIndex);
+
+  usersList->update();
+}
+
+void KUI_project::removeSlot()
+{
+  QModelIndex current = usersList->selectionModel()->currentIndex();
+  
+  DomItem *item = static_cast<DomItem*>( current.internalPointer() );
+
+  
+  if ( current.isValid() && item->node().nodeName()=="user" ) {
+    qDebug() << "Removing: " << item->node().nodeName();
+    model->removeRows( current.row(), 1, current.parent() );
+  }
+  
+  usersList->update();
+}
+
 
 
 

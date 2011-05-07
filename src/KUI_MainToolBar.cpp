@@ -36,6 +36,8 @@ MainToolBar::MainToolBar(KActionCollection* collection, QWidget* parent): KToolB
   addAction( toolBarCollection->action("aim"));
   addAction( toolBarCollection->action("record"));
   addAction( toolBarCollection->action("play"));
+  addAction( toolBarCollection->action("pause"));
+  addAction( toolBarCollection->action("playAfterPause"));
   addAction( toolBarCollection->action("stop"));
   addSeparator();
     
@@ -62,6 +64,8 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("record"))->setEnabled( false );
      (toolBarCollection->action("play"))->setEnabled( false );
      (toolBarCollection->action("stop"))->setEnabled( false );
+     (toolBarCollection->action("pause"))->setVisible( false );
+     (toolBarCollection->action("playAfterPause"))->setVisible( false );
      timeSlider->setEnabled( false );
      timeSlider->setValue( 0 );
      break;
@@ -71,6 +75,8 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("record"))->setEnabled( true );
      (toolBarCollection->action("play"))->setEnabled( false );
      (toolBarCollection->action("stop"))->setEnabled( false );
+     (toolBarCollection->action("pause"))->setVisible( false );
+     (toolBarCollection->action("playAfterPause"))->setVisible( false );
      timeSlider->setEnabled( false );
      timeSlider->setValue( 0 );
      break;
@@ -79,7 +85,10 @@ void MainToolBar::updateInterface(Mode mode)
      (toolBarCollection->action("aim"))->setEnabled( true );
      (toolBarCollection->action("record"))->setEnabled( true );
      (toolBarCollection->action("play"))->setEnabled( true );
+     (toolBarCollection->action("play"))->setVisible( true );
      (toolBarCollection->action("stop"))->setEnabled( false );
+     (toolBarCollection->action("pause"))->setVisible( false );
+     (toolBarCollection->action("playAfterPause"))->setVisible( false );
      timeSlider->setEnabled( false );
      timeSlider->setValue( 0 );
      break;
@@ -87,18 +96,25 @@ void MainToolBar::updateInterface(Mode mode)
      case Playing:
      (toolBarCollection->action("aim"))->setEnabled( false );
      (toolBarCollection->action("record"))->setEnabled( false );
-     (toolBarCollection->action("play"))->setEnabled( false );
+     (toolBarCollection->action("play"))->setVisible( false );
      (toolBarCollection->action("stop"))->setEnabled( true );
+     (toolBarCollection->action("pause"))->setEnabled( true );
+     (toolBarCollection->action("pause"))->setVisible( true );
+     (toolBarCollection->action("playAfterPause"))->setVisible( false );
      timeSlider->setEnabled( true );
      break;
      
      case Pause:
      (toolBarCollection->action("aim"))->setEnabled( false );
      (toolBarCollection->action("record"))->setEnabled( false );
-     (toolBarCollection->action("play"))->setEnabled( true );
-     (toolBarCollection->action("stop"))->setEnabled( false );
+     (toolBarCollection->action("play"))->setVisible( false );
+     (toolBarCollection->action("stop"))->setEnabled( true );
+     (toolBarCollection->action("pause"))->setVisible( false );
+     (toolBarCollection->action("playAfterPause"))->setVisible( true );
+     (toolBarCollection->action("playAfterPause"))->setEnabled( true );
      timeSlider->setEnabled( true );
      break;
+
   }
     
 
@@ -107,6 +123,6 @@ void MainToolBar::updateInterface(Mode mode)
 void MainToolBar::timeShift()
 {
  
-  timeSlider->setValue( (timeSlider->value() + 1 ) );
+  timeSlider->setValue( timeSlider->value() +1 );
 
 }

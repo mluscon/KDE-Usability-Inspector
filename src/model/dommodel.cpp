@@ -281,7 +281,7 @@ bool DomModel::insertRows(int position, int rows, const QModelIndex& parent)
 
 bool DomModel::removeRows(int position, int rows, const QModelIndex& parent)
 {
-   DomItem *parentItem;
+  DomItem *parentItem;
   
   if ( !parent.isValid() ) {
     parentItem =rootItem;
@@ -289,16 +289,15 @@ bool DomModel::removeRows(int position, int rows, const QModelIndex& parent)
     parentItem = static_cast<DomItem*> ( parent.internalPointer() );
   }
   
-  qDebug() << "removing: " << position << " " << rows << " parent: " << parentItem->node().nodeName();
-   
   beginRemoveRows( parent, position, position+rows);
-  parentItem->removeChild( position );
+  qDebug() << "remove child:" << parentItem->removeChild( position );
   endRemoveRows();
   
-  if ( !domFile->open(QFile::WriteOnly) ) {
+  if ( !domFile->open(QFile::Truncate | QFile::WriteOnly) ) {
     return false;
   }
   
+  qDebug() << "writing to file" << domFile->fileName();
   QTextStream out( domFile );
   domDocument.save(out, 4);
   domFile->close();

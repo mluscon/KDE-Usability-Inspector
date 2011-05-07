@@ -172,12 +172,11 @@ UsersEditationDialog::UsersEditationDialog(QWidget* parent, QString xuiPath ): K
   
   model = new DomModel( xuiPath, this);
   
-  list = new QTreeView;    
+  list = new QListView;    
   list->setModel( model );
   list->setRootIndex( model->index( 0, 0, QModelIndex()) );
   list->setMaximumWidth( 150 );
-  list->setColumnHidden( 1, true );
-  list->setColumnHidden( 2, true );
+
   
   connect( list->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
            this, SLOT( updateMappers(QItemSelection,QItemSelection)) );
